@@ -44,10 +44,10 @@
     <nav class="nav" aria-label="Main">
       <a href="home-dashboard.html">Overview</a>
       <a href="spaces.html" aria-current="page">Spaces</a>
-      <a href="home-dashboard.html#documents">Documents</a>
-      <a href="home-dashboard.html#checklists">Checklists<span class="nav-n">4</span></a>
-      <a href="home-dashboard.html#activity">Recent activity</a>
-      <a href="home-dashboard.html#access">Property access</a>
+      <a href="documents.html">Documents</a>
+      <a href="checklists.html">Checklists<span class="nav-n">4</span></a>
+      <a href="activity.html">Activity</a>
+      <a href="access.html">Property access</a>
     </nav>
     <div class="top-r">
       <button class="bell" aria-label="Notifications (12 unread)"><svg class="i"><use href="#i-bell"/></svg><i></i></button>
@@ -64,14 +64,14 @@
       <p id="summary"></p>
     </div>
     <div class="head-acts">
-      <button class="btn green" id="addSubspace" type="button"><svg class="i"><use href="#i-plus"/></svg>Add subspace</button>
+      <button class="btn green" id="addSubspace" type="button"><svg class="i"><use href="#i-plus"/></svg>Add sub-space</button>
       <button class="btn primary" id="addSpace" type="button"><svg class="i"><use href="#i-plus"/></svg>Add space</button>
     </div>
   </div>
 
   <div class="toolbar">
     <div class="seg" role="tablist" id="floors" aria-label="Filter by floor"></div>
-    <label class="search"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><input id="q" type="search" placeholder="Search spaces, subspaces or items" aria-label="Search spaces"></label>
+    <label class="search"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><input id="q" type="search" placeholder="Search spaces, sub-spaces or items" aria-label="Search spaces"></label>
   </div>
 
   <div id="list"></div>
@@ -101,7 +101,7 @@
       <div class="s-txt">
         <a href="space.html#${s.id}">${esc(s.name)}</a>
         <span class="counts">
-          <span>${ico('sub')}${plural(s.subs.length, 'subspace')}</span>
+          <span>${ico('sub')}${plural(s.subs.length, 'sub-space')}</span>
           <span>${ico('box')}${plural(items, 'item')}</span>
         </span>
       </div>
@@ -112,7 +112,7 @@
     const q = $('#q').value.trim().toLowerCase();
     const match = s => !q || s.name.toLowerCase().includes(q) || s.subs.some(x => x.name.toLowerCase().includes(q)) || s.items.some(i => i.name.toLowerCase().includes(q));
     const all = store.all();
-    $('#summary').textContent = `${plural(all.length, 'space')} · ${plural(all.reduce((a, s) => a + s.subs.length, 0), 'subspace')} · ${plural(all.reduce((a, s) => a + s.items.length, 0), 'item')} across ${plural(store.floors.length, 'floor')}`;
+    $('#summary').textContent = `${plural(all.length, 'space')} · ${plural(all.reduce((a, s) => a + s.subs.length, 0), 'sub-space')} · ${plural(all.reduce((a, s) => a + s.items.length, 0), 'item')} across ${plural(store.floors.length, 'floor')}`;
     const floors = floor === 'all' ? store.floors : store.floors.filter(f => f.id === floor);
     let html = '', shown = 0;
     floors.forEach(f => {
@@ -141,12 +141,12 @@
     }).join('');
     let photo = null;
     dialog({
-      title: 'Add subspace', ok: 'Add subspace',
+      title: 'Add sub-space', ok: 'Add sub-space',
       body: `
         <div class="field"><label for="ssParent">Space<span class="req">*</span></label>
           <div class="ctl sel"><select id="ssParent"><option value="">Choose a space</option>${groups}</select></div>
           <span class="msg" hidden>Choose which space this belongs to.</span></div>
-        <div class="field"><label for="ssName">Subspace name<span class="req">*</span></label>
+        <div class="field"><label for="ssName">Sub-space name<span class="req">*</span></label>
           <div class="ctl"><input id="ssName" maxlength="40" placeholder="e.g. Pantry, Walk-in closet"></div>
           <span class="msg" hidden>Enter a name.</span></div>
         <div class="field"><span class="lab">Photo</span>

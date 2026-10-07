@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Documents</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/base.css">
+<style>
+/* Layout: Dropbox-style. Tabs (Item / Property), search; a grid of folder tiles, then file tiles inside a folder. */
+.head-acts{display:flex;gap:8px;flex-wrap:wrap}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+.toolbar .search{flex:0 1 340px;margin-left:auto}
+.toolbar .seg button{height:34px;padding:0 16px;font-size:14px}
+@media (max-width:640px){.toolbar .search{flex:1 1 100%}}
+
+.fold-title{display:flex;align-items:center;gap:14px;min-width:0}
+.fold-title .back{border:1px solid var(--line-2);background:var(--surface);width:36px;height:36px}
+.fold-ico{width:52px;height:52px;border-radius:12px;background:var(--brand-tint);display:grid;place-items:center;flex:none}
+.fold-ico .folder-art{width:34px}
+.fold-title h1{font-size:26px}
+.fold-title p{margin:2px 0 0}
+.loc{display:flex;align-items:center;gap:8px;margin:0 0 16px;min-height:32px}
+.loc h2{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em}
+.loc .up{display:inline-flex;align-items:center;gap:6px;color:var(--ink-2);font-weight:500;font-size:14px;padding:4px 8px 4px 4px;border-radius:7px}
+.loc .up:hover{background:var(--hover);color:var(--ink)}
+.loc .up svg.i{color:currentColor}
+.loc .sep{color:var(--line-2)}
+.loc .n{font-size:13px;color:var(--ink-3);margin-left:4px}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:22px 18px}
+.tile{position:relative;display:grid;gap:10px;min-width:0;text-align:left;border-radius:10px}
+.tile .box{position:relative;aspect-ratio:1/1;max-width:100%;border-radius:10px;background:var(--hover);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;transition:background .15s,border-color .15s,box-shadow .15s}
+.tile-btn{display:grid;gap:10px;text-align:left;min-width:0;border-radius:10px}
+.tile-btn:hover .box{background:var(--brand-tint);border-color:var(--line-2)}
+.tile-btn:focus-visible .box{outline:2px solid var(--brand);outline-offset:2px}
+.folder-art{width:46%;height:auto}
+.folder-art .back{fill:#8FB2EE}
+.folder-art .front{fill:#A9C6F7}
+.meta{display:flex;align-items:flex-start;gap:9px;min-width:0;padding:0 2px}
+.meta .mini{width:22px;height:18px;flex:none;margin-top:2px}
+.meta b{display:block;font-weight:500;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta small{display:block;font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta .txt{min-width:0}
+.tile>.kebab{position:absolute;top:8px;right:8px}
+.tile:hover>.kebab{opacity:1}
+.tile .box .ficon-img{position:absolute;inset:0}
+.owner{display:flex;align-items:center;gap:6px;margin-top:5px;min-width:0}
+.oav{width:20px;height:20px;border-radius:50%;overflow:hidden;flex:none;display:grid;place-items:center;background:var(--seg-track);box-shadow:0 0 0 1px var(--line)}
+.oav img{width:100%;height:100%;object-fit:cover}
+.oav svg.i{width:12px;height:12px}
+.owner{width:fit-content;max-width:100%;border-radius:12px}
+.owner:hover .on{color:var(--brand);text-decoration:underline;text-underline-offset:2px}
+.owner .on{font-size:12.5px;font-weight:500;color:var(--brand);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.where{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.where svg.i{width:12px;height:12px}
+
+/* Search results list */
+.results{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.res{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto 32px;align-items:center;gap:14px;padding:11px 20px;border-bottom:1px solid var(--line)}
+.res:last-child{border-bottom:0}
+.res:hover{background:var(--hover)}
+.res b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:500;padding:3px 9px;border-radius:12px;background:var(--seg-track);color:var(--ink-2);white-space:nowrap}
+.chip svg.i{width:13px;height:13px}
+.res .dt{font-size:13px;color:var(--ink-3);white-space:nowrap}
+mark{background:var(--amber-tint);color:inherit;border-radius:3px;padding:0 1px}
+@media (max-width:640px){.res{grid-template-columns:auto minmax(0,1fr) 32px;padding:11px 16px}.res .chip,.res .dt{display:none}}
+
+/* Upload */
+.drop{position:relative;display:grid;justify-items:center;gap:4px;padding:22px 16px;border:1.5px dashed var(--line-2);border-radius:8px;text-align:center;cursor:pointer;color:var(--ink-2)}
+.drop:hover,.drop.over{border-color:var(--icon);background:var(--fresh)}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.drop u{color:var(--brand);text-decoration:none;font-weight:600}
+.drop small{color:var(--ink-3);font-size:12px}
+.drop svg.i{color:var(--icon);width:22px;height:22px}
+.up-files{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.up-files li{display:flex;align-items:center;gap:10px;font-size:13px}
+.up-files .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.up-files small{color:var(--ink-3)}
+.dlg select:disabled{opacity:.6}
+/* Upload dialog (matches Overview "Add document") */
+.dlg.wide{width:min(560px,100%)}
+.seg-choice{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px;background:var(--seg-track);border-radius:12px}
+.opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;text-align:left;color:var(--ink-2);transition:background .15s,box-shadow .15s}
+.opt:hover{color:var(--ink)}
+.opt:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.opt b{display:block;font-weight:600;font-size:14px}
+.opt small{display:block;font-size:12px;color:var(--ink-3)}
+.opt .oi{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);flex:none}
+.opt .oi svg.i{width:16px;height:16px;color:var(--ink-3)}
+.opt[aria-checked="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(20,32,46,.12)}
+.opt[aria-checked="true"] .oi{background:var(--brand-tint);border-color:transparent}
+.opt[aria-checked="true"] .oi svg.i{color:var(--brand)}
+.step{animation:stepin .2s ease}
+@keyframes stepin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.picks{display:flex;flex-wrap:wrap;gap:8px}
+.pick{height:34px;padding:0 14px;border-radius:17px;border:1px solid var(--line-2);font-size:13.5px;font-weight:500;color:var(--ink-2);background:var(--surface)}
+.pick:hover{border-color:var(--ink-3);color:var(--ink)}
+.pick[aria-checked="true"]{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.field.err .picks .pick{border-color:var(--red)}
+.drop{padding:26px 16px 22px;border-radius:12px;background:var(--hover);gap:6px}
+.drop:hover,.drop.over{border-color:var(--brand);background:var(--brand-tint)}
+.drop-ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);box-shadow:0 2px 6px rgba(20,32,46,.06);margin-bottom:2px;transition:transform .2s}
+.drop.over .drop-ic{transform:translateY(-3px)}
+.drop .drop-ic svg.i{width:20px;height:20px;color:var(--icon)}
+.drop-t{font-size:14px}
+.field.err .drop{border-color:var(--red)}
+.up-files:empty{display:none}
+.up-files li{padding:8px 8px 8px 10px;border:1px solid var(--line);border-radius:9px;font-size:13.5px;background:var(--surface)}
+.up-files .nm{font-weight:500}
+.up-files .rm{width:28px;height:28px;border-radius:6px;display:grid;place-items:center}
+.up-files .rm:hover{background:var(--hover)}
+.up-files .rm svg.i{width:14px;height:14px}
+.up-hint{margin:-4px 0 0;font-size:12.5px;color:var(--ink-3)}
+@media (max-width:560px){.seg-choice{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="logo" href="home-dashboard.html"><img src="assets/logo-mark.png" alt="" width="150" height="130"><span>Home Record Keeper</span></a>
+    <nav class="nav" aria-label="Main">
+      <a href="home-dashboard.html">Overview</a>
+      <a href="spaces.html">Spaces</a>
+      <a href="documents.html" aria-current="page">Documents</a>
+      <a href="checklists.html">Checklists<span class="nav-n">4</span></a>
+      <a href="activity.html">Activity</a>
+      <a href="access.html">Property access</a>
+    </nav>
+    <div class="top-r">
+      <button class="bell" aria-label="Notifications (12 unread)"><svg class="i"><use href="#i-bell"/></svg><i></i></button>
+      <span class="av" role="img" aria-label="Brady Ricci"></span>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <div id="rootHead">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="home-dashboard.html">Vail Residence</a><svg class="i"><use href="#i-right"/></svg><span aria-current="page">Documents</span></nav>
+  <div class="page-h">
+    <div>
+      <h1>Documents</h1>
+      <p id="summary"></p>
+    </div>
+    <div class="head-acts">
+      <button class="btn" id="newFolder" type="button"><svg class="i"><use href="#i-folder-plus"/></svg>New folder</button>
+      <button class="btn primary" id="upload" type="button"><svg class="i"><use href="#i-upload"/></svg>Upload</button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="seg" role="tablist" id="tabs" aria-label="Document type">
+      <button role="tab" type="button" id="tab-item" data-t="item" aria-selected="true">Item</button>
+      <button role="tab" type="button" id="tab-property" data-t="property" aria-selected="false">Property</button>
+    </div>
+    <label class="search"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><input id="q" type="search" placeholder="Search documents" aria-label="Search documents"></label>
+  </div>
+  </div>
+  <div id="folderHead" hidden></div>
+
+  <div id="view" role="tabpanel"></div>
+</main>
+
+<script src="assets/hrk.js"></script>
+<script>
+(function(){
+  const {docs, fileIcon, ext, ico, esc, plural, dialog, menu, toast, readPhoto} = HRK;
+  const $ = s => document.querySelector(s);
+  const folderSlug = n => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  let tab = 'item', folder = '', q = '', fq = '';
+
+  /* Hash: #item, #property, #item-warranty … (plain tokens only) */
+  function readHash(){
+    const h = decodeURIComponent(location.hash.slice(1));
+    const t = h.startsWith('property') ? 'property' : 'item';
+    const rest = h.slice(t.length + 1);
+    tab = t; folder = rest ? (docs.folders(t).find(f => folderSlug(f) === rest) || '') : '';
+  }
+  function writeHash(){ history.replaceState(null, '', '#' + tab + (folder ? '-' + folderSlug(folder) : '')); }
+
+  const folderArt = `<svg class="folder-art" viewBox="0 0 64 48" aria-hidden="true"><path class="back" d="M2 6a4 4 0 0 1 4-4h16l5 6h31a4 4 0 0 1 4 4v30a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z"/><path class="front" d="M2 14a4 4 0 0 1 4-4h52a4 4 0 0 1 4 4v28a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z"/></svg>`;
+  const miniFolder = `<svg class="mini" viewBox="0 0 64 48" aria-hidden="true"><path fill="#8FB2EE" d="M2 6a4 4 0 0 1 4-4h16l5 6h31a4 4 0 0 1 4 4v30a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z"/><path fill="#A9C6F7" d="M2 14a4 4 0 0 1 4-4h52a4 4 0 0 1 4 4v28a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z"/></svg>`;
+  const kebab = (attr, label) => `<button type="button" class="kebab" ${attr} aria-haspopup="menu" aria-expanded="false" aria-label="Actions for ${esc(label)}">${ico('more')}</button>`;
+  const hl = (text, ql) => { if (!ql) return esc(text); const i = text.toLowerCase().indexOf(ql); return i < 0 ? esc(text) : esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + ql.length)) + '</mark>' + esc(text.slice(i + ql.length)); };
+
+  /* Small avatar + name of what the document belongs to */
+  function owner(d){
+    if (d.type !== 'item') return {name:'Vail Residence', photo:'assets/property-cover.jpg', full:'Vail Residence', href:'home-dashboard.html'};
+    const s = HRK.store.get(d.space), it = s && s.items.find(i => i.name === d.item);
+    const href = s ? `space.html#${s.id}${it && it.sub ? '--' + it.sub : ''}` : 'spaces.html';
+    return {name:d.item || 'Item', photo:it && it.photo, full:docs.where(d).label, href};
+  }
+  function ownerHtml(d, ql){
+    if (d.type !== 'item') return '';  /* property documents don't repeat the property name */
+    const o = owner(d);
+    /* Styled as a link; navigation is not wired up yet (o.href holds the destination for later) */
+    return `<span class="owner" title="${esc(o.full)}"><span class="oav">${o.photo ? `<img src="${esc(o.photo)}" alt="">` : ico(d.type === 'item' ? 'box' : 'home')}</span><span class="on">${ql ? hl(o.name, ql) : esc(o.name)}</span></span>`;
+  }
+
+  function draw(){
+    document.querySelectorAll('#tabs [data-t]').forEach(b => b.setAttribute('aria-selected', b.dataset.t === tab));
+    $('#view').setAttribute('aria-labelledby', 'tab-' + tab);
+    const all = docs.all();
+    $('#summary').textContent = `${plural(all.length, 'document')} · ${plural(all.filter(d => d.type === 'item').length, 'item document')} · ${plural(all.filter(d => d.type === 'property').length, 'property document')}`;
+    $('#rootHead').hidden = !!folder; $('#folderHead').hidden = !folder;
+    if (folder) return drawFolder();
+    document.title = 'Documents';
+    const ql = q.trim().toLowerCase();
+    if (ql) return drawSearch(ql);
+    drawFolders();
+  }
+
+  function drawFolders(){
+    const fs = docs.folders(tab);
+    $('#view').innerHTML = `
+      <div class="loc"><h2>${docs.TYPES[tab]}</h2></div>
+      ${fs.length ? `<div class="tiles">${fs.map(f => {
+        const n = docs.inFolder(tab, f).length;
+        return `<div class="tile">
+          <button type="button" class="tile-btn" data-open="${esc(f)}"><span class="box">${folderArt}</span>
+            <span class="meta">${miniFolder}<span class="txt"><b>${esc(f)}</b><small>${plural(n, 'document')}</small></span></span></button>
+          ${kebab(`data-fmenu="${esc(f)}"`, f)}
+        </div>`;
+      }).join('')}</div>`
+      : `<div class="empty-state"><b>No folders yet</b>Use New folder to start organising ${docs.TYPES[tab].toLowerCase()}.</div>`}`;
+  }
+
+  function fileTile(d){
+    return `<div class="tile">
+      <span class="box">${fileIcon(d, true)}</span>
+      <span class="meta"><span class="txt"><b title="${esc(d.name)}">${esc(d.name)}</b>
+        <small>${docs.fmtDate(d.date)} · ${docs.fmtSize(d.size)}</small>
+        ${ownerHtml(d)}</span></span>
+      ${kebab(`data-dmenu="${d.id}"`, d.name)}
+    </div>`;
+  }
+
+  /* Folder screen: its own header (breadcrumb, title, actions, search) and the files */
+  function drawFolder(){
+    document.title = `${folder} · Documents`;
+    $('#folderHead').innerHTML = `
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="home-dashboard.html">Vail Residence</a>${ico('right')}<a href="documents.html#${tab}" data-root>Documents</a>${ico('right')}<a href="documents.html#${tab}" data-root>${docs.TYPES[tab]}</a>${ico('right')}<span aria-current="page">${esc(folder)}</span>
+      </nav>
+      <div class="page-h fold-h">
+        <div class="fold-title">
+          <button type="button" class="ib back" id="up" aria-label="Back to ${docs.TYPES[tab].toLowerCase()}">${ico('left')}</button>
+          <span class="fold-ico">${folderArt}</span>
+          <div><h1>${esc(folder)}</h1><p>${docs.TYPES[tab]}</p></div>
+        </div>
+        <div class="head-acts">
+          <button class="btn" type="button" id="folderMenu" aria-haspopup="menu" aria-expanded="false" aria-label="Folder actions">${ico('more')}</button>
+          <button class="btn primary" type="button" id="folderUpload">${ico('upload')}Upload to ${esc(folder)}</button>
+        </div>
+      </div>
+      <div class="toolbar">
+        <span></span>
+        <label class="search">${ico('search')}<input id="fq" type="search" placeholder="Search in ${esc(folder)}" aria-label="Search in ${esc(folder)}" value="${esc(fq)}"></label>
+      </div>`;
+    drawFolderFiles();
+    $('#fq').addEventListener('input', e => { fq = e.target.value; drawFolderFiles(); });
+    $('#folderUpload').onclick = uploadDialog;
+    $('#folderMenu').onclick = e => folderMenu(e.currentTarget, folder, true);
+    $('#up').onclick = goRoot;
+  }
+  function drawFolderFiles(){
+    const ql = fq.trim().toLowerCase();
+    const all = docs.inFolder(tab, folder);
+    const list = all.filter(d => !ql || d.name.toLowerCase().includes(ql) || docs.where(d).label.toLowerCase().includes(ql));
+    $('#view').innerHTML = list.length ? `<div class="tiles">${list.map(fileTile).join('')}</div>`
+      : all.length ? `<div class="empty-state"><b>Nothing in ${esc(folder)} matches “${esc(fq.trim())}”</b>Try a different name or item.</div>`
+      : `<div class="empty-state"><b>${esc(folder)} is empty</b>Upload a document to add it here.</div>`;
+  }
+  function openFolder(f){ fq = ''; location.hash = '#' + tab + '-' + folderSlug(f); scrollTo(0, 0); }
+  function goRoot(){ fq = ''; location.hash = '#' + tab; }
+  function drawSearch(ql){
+    const list = docs.all().filter(d => d.type === tab && (d.name.toLowerCase().includes(ql) || docs.where(d).label.toLowerCase().includes(ql) || d.folder.toLowerCase().includes(ql)))
+      .sort((a, b) => b.date.localeCompare(a.date));
+    $('#view').innerHTML = `
+      <div class="loc"><h2>Results in ${docs.TYPES[tab].toLowerCase()}</h2><span class="n">${plural(list.length, 'match', )}</span></div>
+      ${list.length ? `<section class="card"><ul class="results">${list.map(d => `
+        <li class="res">${fileIcon(d)}
+          <span style="min-width:0"><b>${hl(d.name, ql)}</b>${ownerHtml(d, ql)}</span>
+          <span class="chip">${ico('folder')}${esc(d.folder)}</span>
+          <span class="dt">${docs.fmtDate(d.date)}</span>
+          <button type="button" class="ib" data-dmenu="${d.id}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for ${esc(d.name)}">${ico('more')}</button>
+        </li>`).join('')}</ul></section>`
+        : `<div class="empty-state"><b>No documents match “${esc(q.trim())}”</b>Try a file name, item or folder.</div>`}`;
+  }
+
+  /* ---------- Dialogs ---------- */
+  function folderOptions(type, sel){ return docs.folders(type).map(f => `<option ${f === sel ? 'selected' : ''}>${esc(f)}</option>`).join(''); }
+  function itemOptions(sel){
+    return `<option value="">Choose an item</option>` + Object.entries(docs.itemGroups()).map(([g, items]) =>
+      `<optgroup label="${esc(g)}">${items.map(i => { const v = i.space + '|' + i.name; return `<option value="${esc(v)}" ${v === sel ? 'selected' : ''}>${esc(i.name)}</option>`; }).join('')}</optgroup>`).join('');
+  }
+  function setErr(bg, sel, bad){ const f = bg.querySelector(sel).closest('.field'); f.classList.toggle('err', bad); const m = f.querySelector('.msg'); if (m) m.hidden = !bad; return bad; }
+
+  function uploadDialog(){
+    let type = tab, cat = folder || '', item = '', files = [];
+    const groups = docs.itemGroups();
+    dialog({
+      title: 'Upload documents', ok: 'Upload', size: 'wide',
+      body: `
+        <div class="field"><span class="lab">What is this document for?</span>
+          <div class="seg-choice" id="upType" role="radiogroup" aria-label="Document type">
+            <button type="button" class="opt" data-t="item" role="radio" aria-checked="${type === 'item'}"><span class="oi">${ico('box')}</span><span><b>An item</b><small>Warranty, invoice or manual</small></span></button>
+            <button type="button" class="opt" data-t="property" role="radio" aria-checked="${type === 'property'}"><span class="oi">${ico('home')}</span><span><b>The property</b><small>Legal, insurance, tax or permit</small></span></button>
+          </div></div>
+        <div class="field step"><span class="lab">Folder</span><div class="picks" id="upCats" role="radiogroup" aria-label="Folder"></div><span class="msg" hidden>Pick a folder.</span></div>
+        <div class="field step" id="upItemF"><label for="upItem">Which item?</label>
+          <div class="ctl sel"><select id="upItem"><option value="">Choose an item</option>${Object.entries(groups).map(([g, items]) => `<optgroup label="${esc(g)}">${items.map(i => `<option value="${esc(i.space + '|' + i.name)}">${esc(i.name)}</option>`).join('')}</optgroup>`).join('')}</select></div>
+          <span class="msg" hidden>Choose the item this belongs to.</span></div>
+        <div class="field"><span class="lab">Files</span>
+          <label class="drop" id="upDrop"><input type="file" id="upInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.jpg,.jpeg,.png,.heic" aria-label="Choose files">
+            <span class="drop-ic">${ico('upload')}</span><span class="drop-t"><b>Drag files here</b> or <u>browse</u></span><small>PDF, Word, Excel or photos · up to 25 MB each</small></label>
+          <ul class="up-files" id="upFiles"></ul><span class="msg" hidden>Add at least one file.</span></div>
+        <p class="up-hint" id="upHint"></p>`,
+      onOpen(bg){
+        const ok = bg.querySelector('[type=submit]');
+        const draw = () => {
+          bg.querySelectorAll('#upType .opt').forEach(o => o.setAttribute('aria-checked', o.dataset.t === type));
+          if (!docs.folders(type).includes(cat)) cat = '';
+          bg.querySelector('#upCats').innerHTML = docs.folders(type).map(f => `<button type="button" class="pick" role="radio" data-cat="${esc(f)}" aria-checked="${f === cat}">${esc(f)}</button>`).join('');
+          bg.querySelector('#upItemF').hidden = type !== 'item';
+          bg.querySelector('#upFiles').innerHTML = files.map((f, i) => `<li>${fileIcon({name:f.name})}<span class="nm">${esc(f.name)}</span><small>${docs.fmtSize(f.size / 1024)}</small><button type="button" class="rm" data-rmf="${i}" aria-label="Remove ${esc(f.name)}">${ico('x')}</button></li>`).join('');
+          ok.textContent = files.length > 1 ? `Upload ${files.length} files` : 'Upload';
+          bg.querySelector('#upHint').textContent = !cat ? 'Pick a folder' : (type === 'item' && !item) ? 'Choose the item' : !files.length ? 'Add at least one file' : `Ready to upload to ${cat}`;
+        };
+        bg.querySelector('#upType').onclick = e => { const o = e.target.closest('[data-t]'); if (!o || o.dataset.t === type) return; type = o.dataset.t; cat = ''; draw(); };
+        bg.querySelector('#upCats').onclick = e => { const o = e.target.closest('[data-cat]'); if (!o) return; cat = o.dataset.cat; draw(); };
+        bg.querySelector('#upItem').onchange = e => { item = e.target.value; draw(); };
+        bg.querySelector('#upInput').onchange = e => { files = [...files, ...e.target.files]; e.target.value = ''; draw(); };
+        bg.querySelector('#upFiles').onclick = e => { const r = e.target.closest('[data-rmf]'); if (!r) return; files.splice(+r.dataset.rmf, 1); draw(); };
+        const dz = bg.querySelector('#upDrop');
+        ['dragenter','dragover'].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.add('over'); }));
+        ['dragleave','drop'].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.remove('over'); }));
+        dz.addEventListener('drop', e => { files = [...files, ...e.dataTransfer.files]; draw(); });
+        bg._state = () => ({type, cat, item, files});
+        draw();
+      },
+      onOk(bg){
+        const {type: t, cat: f, item: it, files: list} = bg._state();
+        const flag = (sel, bad) => { const fl = bg.querySelector(sel).closest('.field'); fl.classList.toggle('err', bad); fl.querySelector('.msg').hidden = !bad; return bad; };
+        const e1 = flag('#upCats', !f), e2 = t === 'item' && flag('#upItem', !it), e3 = flag('#upFiles', !list.length);
+        if (t !== 'item') flag('#upItem', false);
+        if (e1 || e2 || e3) return false;
+        const [space, itemName] = t === 'item' ? it.split('|') : ['', ''];
+        Promise.all(list.map(async file => {
+          let thumb = null; if (file.type.startsWith('image/')) { try { thumb = await readPhoto(file, 600); } catch(_){} }
+          docs.add({name:file.name, type:t, folder:f, size:file.size / 1024, space, item:itemName, thumb});
+        })).then(() => { tab = t; folder = f; q = ''; const qi = $('#q'); if (qi) qi.value = ''; writeHash(); draw(); toast(`${plural(list.length, 'document')} uploaded to ${f}`); });
+      }
+    });
+  }
+
+  function editDialog(d){
+    const base = d.name.replace(/\.[^.]+$/, ''), extn = d.name.slice(base.length);
+    dialog({
+      title: 'Edit document', ok: 'Save changes',
+      body: `
+        <div class="field"><label for="edName">File name<span class="req">*</span></label>
+          <div class="ctl"><input id="edName" maxlength="80" value="${esc(base)}"></div><span class="help">${esc(extn ? 'Keeps the ' + extn + ' extension' : '')}</span><span class="msg" hidden>Enter a file name.</span></div>
+        <div class="field"><label for="edFolder">Folder</label><div class="ctl sel"><select id="edFolder">${folderOptions(d.type, d.folder)}</select></div></div>
+        ${d.type === 'item' ? `<div class="field"><label for="edItem">Item</label><div class="ctl sel"><select id="edItem">${itemOptions(d.space + '|' + d.item)}</select></div></div>` : ''}`,
+      onOk(bg){
+        const n = bg.querySelector('#edName').value.trim();
+        if (setErr(bg, '#edName', !n)) return false;
+        const data = {name:n + extn, folder:bg.querySelector('#edFolder').value};
+        if (d.type === 'item'){ const v = bg.querySelector('#edItem').value; if (v){ const [space, item] = v.split('|'); Object.assign(data, {space, item}); } }
+        docs.update(d.id, data); draw(); toast('Document updated');
+      }
+    });
+  }
+  function deleteDoc(d){
+    dialog({title:`Delete ${esc(d.name)}?`, ok:'Delete document', danger:true, size:'sm',
+      body:`<p><b>${esc(d.name)}</b> will be permanently removed from ${esc(d.folder)}.</p>`,
+      onOk(){ docs.remove(d.id); draw(); toast('Document deleted'); }});
+  }
+  function folderNameDialog({title, ok, value = '', onSave}){
+    dialog({title, ok, size:'sm',
+      body:`<div class="field"><label for="fName">Folder name<span class="req">*</span></label><div class="ctl"><input id="fName" maxlength="40" value="${esc(value)}" placeholder="e.g. Receipts"></div><span class="msg" hidden>Enter a name.</span></div>`,
+      onOk(bg){
+        const v = bg.querySelector('#fName').value.trim();
+        const taken = v && v !== value && docs.folders(tab).some(f => f.toLowerCase() === v.toLowerCase());
+        const f = bg.querySelector('.field'); f.classList.toggle('err', !v || taken); const m = f.querySelector('.msg'); m.hidden = !(!v || taken); m.textContent = taken ? 'A folder with that name already exists.' : 'Enter a name.';
+        if (!v || taken) return false;
+        onSave(v);
+      }});
+  }
+
+  function folderMenu(btn, f, onFolderScreen){
+    const n = docs.inFolder(tab, f).length;
+    menu(btn, [
+      {icon:'edit', label:'Rename folder', run: () => folderNameDialog({title:`Rename ${esc(f)}`, ok:'Save', value:f, onSave: v => {
+        docs.renameFolder(tab, f, v); toast('Folder renamed');
+        if (onFolderScreen){ folder = v; writeHash(); } draw();
+      }})},
+      '-',
+      {icon:'trash', label:'Delete folder', danger:true, run: () => dialog({title:`Delete ${esc(f)}?`, ok:'Delete folder', danger:true, size:'sm',
+        body:`<p>The <b>${esc(f)}</b> folder${n ? ` and its ${plural(n, 'document')}` : ''} will be permanently removed.</p>`,
+        onOk(){ docs.removeFolder(tab, f); toast(`${f} deleted`); if (onFolderScreen){ folder = ''; location.hash = '#' + tab; } else draw(); }})}
+    ]);
+  }
+
+  /* ---------- Events ---------- */  $('#tabs').onclick = e => { const b = e.target.closest('[data-t]'); if (!b || b.dataset.t === tab) return; tab = b.dataset.t; folder = ''; writeHash(); draw(); };
+  $('#q').addEventListener('input', e => { q = e.target.value; draw(); });
+  $('#upload').onclick = uploadDialog;
+  $('#newFolder').onclick = () => folderNameDialog({title:`New folder in ${docs.TYPES[tab].toLowerCase()}`, ok:'Create folder', onSave: v => { docs.addFolder(tab, v); draw(); toast(`${v} created`); }});
+  $('#view').addEventListener('click', e => {
+    const open = e.target.closest('[data-open]');
+    if (open){ openFolder(open.dataset.open); return; }
+    const fm = e.target.closest('[data-fmenu]');
+    if (fm) return folderMenu(fm, fm.dataset.fmenu, false);
+    const dm = e.target.closest('[data-dmenu]');
+    if (dm){
+      const d = docs.get(dm.dataset.dmenu);
+      return menu(dm, [
+        {icon:'edit', label:'Edit', run: () => editDialog(d)},
+        '-',
+        {icon:'trash', label:'Delete', danger:true, run: () => deleteDoc(d)}
+      ]);
+    }
+  });
+  $('#folderHead').addEventListener('click', e => { const r = e.target.closest('[data-root]'); if (r){ e.preventDefault(); goRoot(); } });
+  addEventListener('hashchange', () => { readHash(); draw(); });
+  readHash(); draw();
+})();
+</script>
+</body>
+</html>

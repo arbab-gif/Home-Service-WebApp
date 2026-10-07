@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Notifications</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/base.css">
+<style>
+/* Layout: All / Unread tabs and "Mark all as read", then one white list of notifications. */
+.page{max-width:900px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.bar .seg button{height:32px}
+.bar .seg .n{font-size:11.5px;color:var(--ink-3);font-weight:500}
+.list{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.link-btn:disabled{opacity:.45;cursor:default;background:none}
+.nothing{display:grid;justify-items:center;gap:8px;text-align:center;padding:56px 16px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.nothing .ic{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--green-tint)}
+.nothing .ic svg.i{width:26px;height:26px;color:var(--green)}
+.nothing b{font-size:16px}
+.nothing p{margin:0;color:var(--ink-3)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="logo" href="home-dashboard.html"><img src="assets/logo-mark.png" alt="" width="150" height="130"><span>Home Record Keeper</span></a>
+    <nav class="nav" aria-label="Main">
+      <a href="home-dashboard.html">Overview</a>
+      <a href="spaces.html">Spaces</a>
+      <a href="documents.html">Documents</a>
+      <a href="checklists.html">Checklists<span class="nav-n">4</span></a>
+      <a href="activity.html">Activity</a>
+      <a href="access.html">Property access</a>
+    </nav>
+    <div class="top-r">
+      <button class="bell" aria-label="Notifications"><svg class="i"><use href="#i-bell"/></svg><i></i></button>
+      <span class="av" role="img" aria-label="Brady Ricci"></span>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="home-dashboard.html">Vail Residence</a><svg class="i"><use href="#i-right"/></svg><span aria-current="page">Notifications</span></nav>
+  <div class="page-h"><div><h1>Notifications</h1><p id="summary"></p></div></div>
+
+  <div class="bar">
+    <div class="seg" role="tablist" id="tabs" aria-label="Show">
+      <button role="tab" type="button" data-f="all" aria-selected="true">All</button>
+      <button role="tab" type="button" data-f="unread" aria-selected="false">Unread <span class="n" id="unreadN"></span></button>
+    </div>
+    <button type="button" class="link-btn" id="readAll"><svg class="i"><use href="#i-check"/></svg>Mark all as read</button>
+  </div>
+
+  <div id="out"></div>
+</main>
+
+<script src="assets/hrk.js"></script>
+<script>
+(function(){
+  const {notes: N, ico, plural} = HRK;
+  const $ = s => document.querySelector(s);
+  let f = 'all';
+
+  function draw(){
+    const all = N.all(), unread = N.unread();
+    $('#summary').textContent = unread ? `${plural(unread, 'unread notification')} across your properties` : 'You\'re all caught up';
+    $('#unreadN').textContent = unread || '';
+    $('#readAll').disabled = !unread;
+    document.querySelectorAll('#tabs [data-f]').forEach(b => b.setAttribute('aria-selected', b.dataset.f === f));
+    const list = f === 'unread' ? all.filter(n => !n.read) : all;
+    $('#out').innerHTML = list.length ? `<ul class="list" id="list">${list.map(n => N.row(n)).join('')}</ul>`
+      : `<div class="nothing"><span class="ic">${ico('check')}</span><b>You're all caught up</b><p>No unread notifications right now.</p></div>`;
+  }
+
+  $('#tabs').onclick = e => { const b = e.target.closest('[data-f]'); if (!b) return; f = b.dataset.f; draw(); };
+  $('#readAll').onclick = () => { N.readAll(); draw(); HRK.toast('All notifications marked as read'); };
+  $('#out').addEventListener('click', e => { const r = e.target.closest('[data-note]'); if (!r) return; const n = N.all().find(x => x.id === r.dataset.note); N.read(n.id, !n.read); draw(); });
+  $('#out').addEventListener('keydown', e => { const r = e.target.closest('[data-note]'); if (r && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); r.click(); } });
+  /* keep this list in step when the bell overview marks things read */
+  document.addEventListener('click', () => setTimeout(draw), true);
+  draw();
+})();
+</script>
+</body>
+</html>

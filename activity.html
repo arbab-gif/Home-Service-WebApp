@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Activity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/base.css">
+<style>
+/* Layout: filter bar (person, period, type, search), then a day-grouped timeline; each day is its own white card. */
+.filters{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+.filters .seg button{height:32px}
+.filters .search{flex:0 1 300px;margin-left:auto}
+.sel{position:relative;display:inline-flex;flex:none}
+.sel::after{content:"";position:absolute;right:10px;top:50%;width:16px;height:16px;margin-top:-8px;background:var(--ink-3);pointer-events:none;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center/contain no-repeat}
+.sel select{appearance:none;-webkit-appearance:none;height:36px;padding:0 34px 0 12px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:13.5px;font-weight:500;cursor:pointer}
+.sel select:hover{border-color:var(--ink-3)}
+.sel select:focus-visible{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint)}
+.sel.on select{background:var(--brand-tint);border-color:transparent;color:var(--brand)}
+.sel.on::after{background:var(--brand)}
+
+.day{margin-bottom:22px}
+.day-h{display:flex;align-items:baseline;gap:8px;margin:0 0 10px;padding-left:2px}
+.day-h h2{margin:0;font-size:14px;font-weight:600}
+.day-h span{font-size:12.5px;color:var(--ink-3)}
+.feed{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ev{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:14px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--line)}
+.ev:last-child{border-bottom:0}
+.ev:hover{background:var(--hover)}
+.who{position:relative;display:block;width:40px;height:40px}
+.who .pic{display:block;width:40px;height:40px;border-radius:50%;background:var(--line) center/cover no-repeat;box-shadow:0 0 0 1px var(--line)}
+.who .pic.logo{background-color:var(--surface);background-size:70%}
+.who .tb{position:absolute;right:-3px;bottom:-3px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;box-shadow:0 0 0 2px var(--surface)}
+.who .tb svg.i{width:11px;height:11px;color:#fff}
+.tb.document{background:#C9781A}.tb.checklist{background:#2F8F57}.tb.space{background:#5A4F8A}.tb.access{background:#24518A}.tb.property{background:#6B7480}
+.ev p{margin:0;line-height:1.45;color:var(--ink-2);min-width:0}
+.ev p b{color:var(--ink);font-weight:600}
+.ev p .tg{color:var(--ink);font-weight:500}
+.ev small{display:flex;align-items:center;gap:6px;margin-top:2px;font-size:12.5px;color:var(--ink-3);min-width:0}
+.ev small span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev time{font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+mark{background:var(--amber-tint);color:inherit;border-radius:3px;padding:0 1px}
+
+.nothing{display:grid;justify-items:center;gap:10px;text-align:center;padding:56px 16px}
+.nothing .ic{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);box-shadow:0 6px 16px rgba(20,32,46,.06)}
+.nothing .ic svg.i{width:28px;height:28px;color:var(--brand)}
+.nothing b{font-size:16px;color:var(--ink)}
+.nothing p{margin:0;color:var(--ink-3)}
+.more-btn{display:flex;justify-content:center;margin-top:4px}
+@media (max-width:640px){.filters .search{flex:1 1 100%}.ev{padding:12px 14px;grid-template-columns:40px minmax(0,1fr)}.ev time{grid-column:2;margin-top:-6px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="logo" href="home-dashboard.html"><img src="assets/logo-mark.png" alt="" width="150" height="130"><span>Home Record Keeper</span></a>
+    <nav class="nav" aria-label="Main">
+      <a href="home-dashboard.html">Overview</a>
+      <a href="spaces.html">Spaces</a>
+      <a href="documents.html">Documents</a>
+      <a href="checklists.html">Checklists<span class="nav-n">4</span></a>
+      <a href="activity.html" aria-current="page">Activity</a>
+      <a href="access.html">Property access</a>
+    </nav>
+    <div class="top-r">
+      <button class="bell" aria-label="Notifications (12 unread)"><svg class="i"><use href="#i-bell"/></svg><i></i></button>
+      <span class="av" role="img" aria-label="Brady Ricci"></span>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="home-dashboard.html">Vail Residence</a><svg class="i"><use href="#i-right"/></svg><span aria-current="page">Activity</span></nav>
+  <div class="page-h">
+    <div><h1>Activity</h1><p id="summary"></p></div>
+  </div>
+
+  <div class="filters">
+    <div class="seg" role="tablist" id="types" aria-label="Activity type"></div>
+    <span class="sel" id="periodWrap"><select id="period" aria-label="Filter by date">
+      <option value="7">Last 7 days</option>
+      <option value="30" selected>Last 30 days</option>
+      <option value="90">Last 90 days</option>
+      <option value="all">All time</option>
+    </select></span>
+  </div>
+
+  <div id="feed"></div>
+</main>
+
+<script src="assets/hrk.js"></script>
+<script>
+(function(){
+  const {activity: A, ico, esc, plural} = HRK;
+  const $ = s => document.querySelector(s);
+  const TYPE_ICON = {document:'file', checklist:'check', space:'layers', access:'user', property:'home'};
+  let period = '30', type = 'all', q = '', shown = 40;
+
+  $('#types').innerHTML = [['all', 'All'], ...Object.entries(A.TYPES)].map(([k, v]) => `<button role="tab" type="button" data-type="${k}" aria-selected="${k === type}">${v}</button>`).join('');
+
+  const hl = (text, ql) => { if (!ql) return esc(text); const i = text.toLowerCase().indexOf(ql); return i < 0 ? esc(text) : esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + ql.length)) + '</mark>' + esc(text.slice(i + ql.length)); };
+
+  function filtered(){
+    const ql = q.trim().toLowerCase();
+    const since = period === 'all' ? 0 : Date.now() - (+period) * 864e5;
+    return A.all().filter(e => (type === 'all' || e.type === type) && new Date(e.at).getTime() >= since &&
+      (!ql || [A.PEOPLE[e.who].name, e.verb, e.target, e.context].join(' ').toLowerCase().includes(ql)));
+  }
+
+  function draw(){
+    $('#periodWrap').classList.toggle('on', period !== '30');
+    document.querySelectorAll('#types [data-type]').forEach(b => b.setAttribute('aria-selected', b.dataset.type === type));
+    const list = filtered(), ql = q.trim().toLowerCase();
+    $('#summary').textContent = `${plural(list.length, 'update')} ${period === 'all' ? 'in total' : 'in the last ' + period + ' days'} at Vail Residence`;
+    if (!list.length){
+      $('#feed').innerHTML = `<div class="nothing"><span class="ic">${ico('pulse')}</span><b>Nothing here yet</b>
+        <p>${period !== 'all' ? 'Nothing in this window. Try widening the date filter.' : 'No activity matches these filters.'}</p>
+        ${period !== 'all' ? `<button type="button" class="btn" id="allTime">Show all time</button>` : `<button type="button" class="btn" id="clear">Clear filters</button>`}</div>`;
+      return;
+    }
+    const days = [];
+    list.slice(0, shown).forEach(e => { const k = A.dayLabel(e.at); let d = days.find(x => x.k === k); if (!d) days.push(d = {k, items:[]}); d.items.push(e); });
+    $('#feed').innerHTML = days.map(d => `
+      <section class="day" aria-label="${esc(d.k)}">
+        <div class="day-h"><h2>${esc(d.k)}</h2><span>${plural(d.items.length, 'update')}</span></div>
+        <ul class="feed">${d.items.map(e => {
+          const p = A.PEOPLE[e.who] || A.PEOPLE.brady;
+          return `<li class="ev">
+            <span class="who"><span class="pic${p.logo ? ' logo' : ''}" role="img" aria-label="${esc(p.name)}" style="background-image:url('${p.avatar}')"></span><span class="tb ${e.type}" title="${A.TYPES[e.type]}">${ico(TYPE_ICON[e.type])}</span></span>
+            <div style="min-width:0"><p><b>${hl(p.short, ql)}</b> ${hl(e.verb, ql)} <span class="tg">${hl(e.target, ql)}</span></p>
+              ${e.context ? `<small><span>${hl(e.context, ql)}</span></small>` : ''}</div>
+            <time datetime="${e.at}">${A.time(e.at)}</time>
+          </li>`;
+        }).join('')}</ul>
+      </section>`).join('') + (list.length > shown ? `<div class="more-btn"><button type="button" class="btn" id="more">Show more (${list.length - shown})</button></div>` : '');
+  }
+
+  $('#period').onchange = e => { period = e.target.value; shown = 40; draw(); };
+  $('#types').onclick = e => { const b = e.target.closest('[data-type]'); if (!b) return; type = b.dataset.type; draw(); };
+  $('#feed').addEventListener('click', e => {
+    if (e.target.closest('#allTime')){ period = 'all'; $('#period').value = 'all'; draw(); }
+    if (e.target.closest('#clear')){ type = 'all'; draw(); }
+    if (e.target.closest('#more')){ shown += 40; draw(); }
+  });
+  draw();
+})();
+</script>
+</body>
+</html>

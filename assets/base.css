@@ -164,6 +164,24 @@ svg.i{width:16px;height:16px;flex:none;color:var(--ink-3);stroke:currentColor;fi
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:8px;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.2);max-width:calc(100vw - 32px);display:flex;align-items:center;gap:8px}
 .toast svg.i{color:var(--icon)}
 
+/* File-type icons (same treatment as Overview) */
+.ficon{position:relative;width:30px;height:38px;flex:none;display:block}
+.ficon svg{width:100%;height:100%;display:block}
+.ficon .pg{fill:var(--fc-soft);stroke:var(--fc);stroke-width:1.5}
+.ficon .fold{fill:var(--surface);stroke:var(--fc);stroke-width:1.5;stroke-linejoin:round}
+.ficon b{position:absolute;left:-3px;bottom:6px;font-size:8.5px;line-height:1;font-weight:700;letter-spacing:.02em;color:#fff;background:var(--fc);padding:2px 3px;border-radius:2px}
+.ficon.big{width:64px;height:80px}
+.ficon.big b{font-size:13px;bottom:12px;left:-6px;padding:3px 6px;border-radius:3px}
+.f-pdf{--fc:#D93F31;--fc-soft:#FDEDEB}
+.f-doc,.f-docx{--fc:#2B63C6;--fc-soft:#EAF0FB}
+.f-xls,.f-xlsx,.f-csv{--fc:#1E8A4C;--fc-soft:#E7F5ED}
+.f-jpg,.f-jpeg,.f-png,.f-heic,.ficon-img{--fc:#C9781A;--fc-soft:#FCF2E4}
+.f-txt{--fc:#6B7480;--fc-soft:#F0F2F4}
+.ficon-img img{width:100%;height:100%;object-fit:cover;border-radius:4px;border:1px solid var(--line);background:var(--fc-soft)}
+.ficon.big.ficon-img{width:100%;height:100%}
+.ficon.big.ficon-img img{border-radius:0;border:0}
+.ficon.big.ficon-img b{left:10px;bottom:10px}
+
 /* Empty results */
 .empty-state{padding:40px 16px;text-align:center;color:var(--ink-3)}
 .empty-state b{display:block;color:var(--ink);font-size:15px;margin-bottom:4px}

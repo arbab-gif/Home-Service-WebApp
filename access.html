@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Property Access</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/base.css">
+<style>
+/* Layout: people list (with pending invites) on the left, "what each role can do" on the right. */
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
+.layout.open{grid-template-columns:minmax(0,1fr) 320px}
+@media (max-width:980px){.layout.open{grid-template-columns:minmax(0,1fr)}}
+.head-acts{display:flex;align-items:center;gap:8px}
+.info-btn{position:relative;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;border:1px solid transparent;color:var(--ink-2);transition:background .2s ease,transform .15s ease,box-shadow .2s ease}
+.info-btn:hover{background:var(--seg-track)}
+.info-btn:active{transform:scale(.88)}
+.info-btn svg.i{width:20px;height:20px;color:var(--ink-2);transition:color .2s ease,transform .35s cubic-bezier(.3,1.6,.5,1)}
+.info-btn:hover svg.i{transform:scale(1.08)}
+.info-btn[aria-pressed="true"]{background:var(--brand-tint)}
+.info-btn[aria-pressed="true"] svg.i{color:var(--brand);transform:rotate(360deg) scale(1.05)}
+/* one-off ripple when the panel opens */
+.info-btn::after{content:"";position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 0 var(--brand);opacity:0;pointer-events:none}
+.info-btn.ping::after{animation:ping .6s ease-out}
+@keyframes ping{0%{opacity:.5;box-shadow:0 0 0 0 var(--brand)}100%{opacity:0;box-shadow:0 0 0 10px var(--brand)}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.roles{animation:slidein .22s ease}
+@keyframes slidein{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+.sec-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px 12px;flex-wrap:wrap}
+.sec-h h2{margin:0;font-size:15px;font-weight:600}
+.sec-h h2 span{font-weight:400;color:var(--ink-3);margin-left:4px}
+.sec-h .search{flex:0 1 260px}
+.people{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.p{display:grid;grid-template-columns:44px minmax(0,1fr) auto auto;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--line)}
+.p:last-child{border-bottom:0}
+.p:hover{background:var(--hover)}
+.pic{width:44px;height:44px;border-radius:50%;background:var(--line) center/cover no-repeat;box-shadow:0 0 0 1px var(--line);display:grid;place-items:center;font-weight:600;color:var(--ink-3)}
+.pic.inv{background:var(--surface);border:1.5px dashed var(--line-2);box-shadow:none}
+.pic.inv svg.i{width:18px;height:18px}
+.nm{min-width:0}
+.nm b{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm .em{display:block;font-size:13px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-top:5px;font-size:12.5px;color:var(--ink-3)}
+.meta span{display:inline-flex;align-items:center;gap:5px}
+.meta svg.i{width:13px;height:13px}
+.meta .soon{color:var(--amber);font-weight:500}
+.meta .soon svg.i{color:var(--amber)}
+.you{font-size:11px;font-weight:600;padding:1px 7px;border-radius:5px;background:var(--brand-tint);color:var(--brand)}
+.pend{font-size:11px;font-weight:600;padding:1px 7px;border-radius:5px;background:var(--amber-tint);color:var(--amber)}
+.role-btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 10px 0 12px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);font-size:13.5px;font-weight:500}
+.role-btn:hover{border-color:var(--ink-3)}
+.role-btn svg.i{width:15px;height:15px}
+.role-fixed{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:8px;background:var(--brand-tint);color:var(--brand);font-size:13.5px;font-weight:600}
+.role-fixed svg.i{width:15px;height:15px;color:var(--brand)}
+.p .acts{display:flex;align-items:center;gap:4px}
+.p .ib{width:34px;height:34px}
+.btn.sm{height:32px;padding:0 10px;font-size:13px}
+.section-gap{margin-top:20px}
+
+/* Roles panel */
+.roles{padding:16px 16px 18px;display:grid;gap:12px;position:sticky;top:16px}
+.roles-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.roles h2{margin:0;font-size:15px;font-weight:600}
+#roles{display:grid;gap:10px}
+.role-card{display:grid;gap:10px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.rc-h{display:grid;gap:2px}
+.rc-h b{font-size:14.5px;font-weight:600}
+.rc-h span{font-size:12.5px;color:var(--ink-3);line-height:1.4}
+.role-card ul{list-style:none;margin:0;padding:10px 0 0;border-top:1px solid var(--line);display:grid;gap:7px;font-size:13px;color:var(--ink-2);line-height:1.35}
+.role-card li{display:grid;grid-template-columns:16px minmax(0,1fr);gap:8px;align-items:start}
+.role-card li svg.i{width:15px;height:15px;margin-top:1px}
+.role-card li.yes svg.i{color:var(--green)}
+.role-card li.no{color:var(--ink-3)}
+.role-card li.no svg.i{color:var(--ink-3)}
+
+/* Role menu with descriptions */
+.pop .rm-opt{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
+.pop .rm-opt b{font-weight:500}
+.pop .rm-opt small{grid-column:1;font-size:12px;color:var(--ink-3)}
+.pop .rm-opt .tk{grid-row:1/span 2;grid-column:2;visibility:hidden}
+.pop .rm-opt[aria-checked="true"] .tk{visibility:visible;color:var(--brand)}
+.pop .rm-opt[aria-checked="true"] b{color:var(--brand);font-weight:600}
+
+/* Share dialog */
+.chips-in{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:42px;padding:5px 8px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);cursor:text}
+.chips-in:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint)}
+.chips-in.err{border-color:var(--red)}
+.chips-in input{flex:1;min-width:160px;height:30px;border:0;outline:none;background:transparent;color:var(--ink);font:inherit;font-size:14px}
+.em-chip{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 4px 0 10px;border-radius:13px;background:var(--brand-tint);color:var(--brand);font-size:13px;font-weight:500}
+.em-chip.bad{background:var(--red-tint);color:var(--red)}
+.em-chip button{width:20px;height:20px;border-radius:50%;display:grid;place-items:center}
+.em-chip button svg.i{width:12px;height:12px;color:currentColor}
+.role-pick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rp{display:grid;gap:3px;text-align:left;padding:11px 12px;border:1px solid var(--line-2);border-radius:10px}
+.rp:hover{border-color:var(--ink-3)}
+.rp[aria-checked="true"]{border-color:var(--brand);background:var(--brand-tint);box-shadow:0 0 0 1px var(--brand) inset}
+.rp b{font-weight:600}
+.rp small{font-size:12px;color:var(--ink-3);line-height:1.35}
+.len{display:flex;flex-wrap:wrap;gap:6px}
+.len button{height:32px;padding:0 12px;border-radius:16px;border:1px solid var(--line-2);font-size:13px;font-weight:500;color:var(--ink-2)}
+.len button:hover{border-color:var(--ink-3);color:var(--ink)}
+.len button[aria-checked="true"]{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.date-in{height:36px;padding:0 10px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:13.5px}
+.dlg textarea{width:100%;min-height:80px;padding:10px 12px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;resize:vertical}
+.dlg textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint)}
+.dlg.wide{width:min(560px,100%)}
+@media (max-width:640px){.p{grid-template-columns:44px minmax(0,1fr);padding:14px 16px}.p .r,.p .acts{grid-column:2}.sec-h{padding:14px 16px 10px}.role-pick{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="logo" href="home-dashboard.html"><img src="assets/logo-mark.png" alt="" width="150" height="130"><span>Home Record Keeper</span></a>
+    <nav class="nav" aria-label="Main">
+      <a href="home-dashboard.html">Overview</a>
+      <a href="spaces.html">Spaces</a>
+      <a href="documents.html">Documents</a>
+      <a href="checklists.html">Checklists<span class="nav-n">4</span></a>
+      <a href="activity.html">Activity</a>
+      <a href="access.html" aria-current="page">Property access</a>
+    </nav>
+    <div class="top-r">
+      <button class="bell" aria-label="Notifications (12 unread)"><svg class="i"><use href="#i-bell"/></svg><i></i></button>
+      <span class="av" role="img" aria-label="Brady Ricci"></span>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="home-dashboard.html">Vail Residence</a><svg class="i"><use href="#i-right"/></svg><span aria-current="page">Property access</span></nav>
+  <div class="page-h">
+    <div><h1>Property access</h1><p id="summary"></p></div>
+    <div class="head-acts">
+      <button class="btn primary" type="button" id="share"><svg class="i"><use href="#i-useradd"/></svg>Share access</button>
+    </div>
+  </div>
+
+  <div class="layout" id="layout">
+    <div>
+      <section class="card" aria-labelledby="peopleH">
+        <div class="sec-h"><h2 id="peopleH">People with access <span id="peopleN"></span></h2>
+          <label class="search"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><input id="q" type="search" placeholder="Search by name or email" aria-label="Search people"></label></div>
+        <ul class="people" id="people"></ul>
+      </section>
+      <section class="card section-gap" id="pendingSec" aria-labelledby="pendH">
+        <div class="sec-h"><h2 id="pendH">Pending invites <span id="pendN"></span></h2></div>
+        <ul class="people" id="pending"></ul>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script src="assets/hrk.js"></script>
+<script>
+(function(){
+  const {access: X, ico, esc, plural, dialog, menu, toast, docs} = HRK;
+  const $ = s => document.querySelector(s);
+  let q = '';
+
+  const until = m => {
+    if (!m.until) return `<span>${ico('clock')}Unlimited</span>`;
+    const left = X.daysLeft(m.until);
+    if (left < 0) return `<span class="soon">${ico('clock')}Expired ${docs.fmtDate(m.until)}</span>`;
+    return `<span class="${left <= 7 ? 'soon' : ''}">${ico('clock')}Until ${docs.fmtDate(m.until)} · ${left === 0 ? 'ends today' : plural(left, 'day') + ' left'}</span>`;
+  };
+  const pic = m => { const a = X.avatar(m); return a ? `<span class="pic" role="img" aria-label="${esc(X.display(m))}" style="background-image:url('${a}')"></span>` : `<span class="pic inv" aria-hidden="true">${ico('mail')}</span>`; };
+
+  function render(){
+    const ql = q.trim().toLowerCase();
+    const match = m => !ql || (m.name || '').toLowerCase().includes(ql) || m.email.toLowerCase().includes(ql);
+    const act = X.active(), pen = X.pending();
+    $('#summary').textContent = `${plural(act.length, 'person', )} ${act.length === 1 ? 'has' : 'have'} access to Vail Residence${pen.length ? ` · ${plural(pen.length, 'invite')} waiting` : ''}`.replace('1 persons', '1 person').replace(/(\d+) persons/, '$1 people');
+    $('#peopleN').textContent = act.length;
+    const list = act.filter(match);
+    $('#people').innerHTML = list.map(m => `
+      <li class="p">
+        ${pic(m)}
+        <div class="nm"><b>${esc(m.name)}${m.id === 'brady' ? '<span class="you">You</span>' : ''}</b><span class="em">${esc(m.email)}</span>
+          <div class="meta">${until(m)}${m.added ? `<span>Added ${docs.fmtDate(m.added)}</span>` : ''}</div></div>
+        <span class="r">${m.role === 'owner' ? `<span class="role-fixed">${ico('shield')}Owner</span>` : `<button type="button" class="role-btn" data-role="${m.id}" aria-haspopup="menu" aria-expanded="false" aria-label="Role for ${esc(m.name)}: ${X.ROLES[m.role].label}">${X.ROLES[m.role].label}${ico('down')}</button>`}</span>
+        <span class="acts">${m.role === 'owner' ? '<span style="width:34px"></span>' : `<button type="button" class="ib" data-pmenu="${m.id}" aria-haspopup="menu" aria-expanded="false" aria-label="More for ${esc(m.name)}">${ico('more')}</button>`}</span>
+      </li>`).join('') || `<li class="empty-state"><b>No one matches “${esc(q.trim())}”</b>Try a name or email address.</li>`;
+    const plist = pen.filter(match);
+    $('#pendingSec').hidden = !pen.length;
+    $('#pendN').textContent = pen.length;
+    $('#pending').innerHTML = plist.map(m => `
+      <li class="p">
+        ${pic(m)}
+        <div class="nm"><b>${esc(m.email)}<span class="pend">Invite pending</span></b>
+          <div class="meta"><span>${ico('send')}Sent ${docs.fmtDate(m.invited)}</span><span>${X.ROLES[m.role].label}</span>${until(m)}</div></div>
+        <span class="r"><button type="button" class="btn sm" data-resend="${m.id}">${ico('send')}Resend</button></span>
+        <span class="acts"><button type="button" class="ib" data-cancel="${m.id}" aria-label="Cancel invite to ${esc(m.email)}">${ico('x')}</button></span>
+      </li>`).join('') || (pen.length ? `<li class="empty-state"><b>No invites match</b></li>` : '');
+    document.querySelectorAll('.nav .nav-n').forEach(n => n.textContent = HRK.checklists.active().length);
+  }
+
+  /* ---------- Role change: menu, then confirm ---------- */
+  function roleMenu(btn, m){
+    menu(btn, ['editor', 'viewer'].map(r => ({icon:'check', label:'', role:r, run: () => confirmRole(m, r)})));
+    const pop = document.querySelector('.pop');
+    pop.querySelectorAll('button').forEach((b, i) => {
+      const r = ['editor', 'viewer'][i];
+      b.classList.add('rm-opt'); b.setAttribute('role', 'menuitemradio'); b.setAttribute('aria-checked', m.role === r);
+      b.innerHTML = `<b>${X.ROLES[r].label}</b><small>${esc(X.ROLES[r].blurb)}</small><svg class="i tk" aria-hidden="true"><use href="#i-check"/></svg>`;
+    });
+  }
+  function confirmRole(m, role){
+    if (m.role === role) return;
+    dialog({title:`Change ${esc(m.name)}'s role to ${X.ROLES[role].label}?`, ok:`Change to ${X.ROLES[role].label}`, size:'sm',
+      body:`<p><b>${esc(m.name)}</b> is currently ${m.role === 'editor' ? 'an' : 'a'} ${X.ROLES[m.role].label}. As ${role === 'editor' ? 'an' : 'a'} ${X.ROLES[role].label} they ${role === 'editor' ? 'will be able to add, edit and upload records' : 'will only be able to view records'} at Vail Residence.</p>`,
+      onOk(){ X.setRole(m.id, role); render(); toast(`${m.name} is now ${role === 'editor' ? 'an' : 'a'} ${X.ROLES[role].label}`); }});
+  }
+
+  /* ---------- Access length ---------- */
+  const LENGTHS = [['7','1 week'], ['30','1 month'], ['90','3 months'], ['none','Unlimited'], ['custom','Custom']];
+  const isoIn = n => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+  function lengthPicker(root, current){
+    let pick = current === null ? 'none' : current === undefined ? '30' : 'custom', date = current || isoIn(30);
+    const draw = () => {
+      root.innerHTML = `<div class="len" role="radiogroup" aria-label="Access length">${LENGTHS.map(([k, v]) => `<button type="button" role="radio" data-len="${k}" aria-checked="${k === pick}">${v}</button>`).join('')}</div>
+        ${pick === 'custom' ? `<div style="margin-top:8px"><input type="date" class="date-in" id="lenDate" min="${isoIn(1)}" value="${date}" aria-label="Access ends on"></div>` : ''}
+        <span class="help" style="display:block;margin-top:6px">${pick === 'none' ? 'Access never expires. You can remove it any time.' : `Access ends on ${docs.fmtDate(value() || isoIn(1))}.`}</span>`;
+    };
+    const value = () => pick === 'none' ? null : pick === 'custom' ? (root.querySelector('#lenDate') ? root.querySelector('#lenDate').value : date) : isoIn(+pick);
+    root.addEventListener('click', e => { const b = e.target.closest('[data-len]'); if (!b) return; pick = b.dataset.len; draw(); });
+    root.addEventListener('change', e => { if (e.target.id === 'lenDate'){ date = e.target.value; draw(); } });
+    draw();
+    return value;
+  }
+  function lengthDialog(m){
+    let get;
+    dialog({title:`Access length for ${esc(m.name || m.email)}`, ok:'Save', size:'sm',
+      body:`<div class="field"><span class="lab">How long should ${esc(m.name || m.email)} have access?</span><div id="lenPick"></div></div>`,
+      onOpen(bg){ get = lengthPicker(bg.querySelector('#lenPick'), m.until); },
+      onOk(){ const v = get(); X.setUntil(m.id, v); render(); toast(v ? `Access now ends ${docs.fmtDate(v)}` : 'Access is now unlimited'); }});
+  }
+  function removeDialog(m){
+    dialog({title:`Remove ${esc(m.name)}'s access?`, ok:'Remove access', danger:true, size:'sm',
+      body:`<p><b>${esc(m.name)}</b> will no longer be able to see Vail Residence or any of its records. You can share access again later.</p>`,
+      onOk(){ X.remove(m.id); render(); toast(`${m.name} no longer has access`); }});
+  }
+
+  /* ---------- Share access ---------- */
+  function shareDialog(){
+    let emails = [], role = 'viewer', getLen;
+    const valid = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+    dialog({title:'Share access to Vail Residence', ok:'Send invite', size:'wide',
+      body:`
+        <div class="field"><label for="emIn">Email addresses<span class="req">*</span></label>
+          <div class="chips-in" id="chips"><input id="emIn" type="email" placeholder="name@example.com" autocomplete="off"></div>
+          <span class="help">Press Enter or comma after each address.</span><span class="msg" hidden></span></div>
+        <div class="field"><span class="lab">Role</span><div class="role-pick" role="radiogroup" aria-label="Role">
+          ${['editor', 'viewer'].map(r => `<button type="button" class="rp" role="radio" data-rp="${r}" aria-checked="${r === role}"><b>${X.ROLES[r].label}</b><small>${esc(X.ROLES[r].blurb)}</small></button>`).join('')}</div></div>
+        <div class="field"><span class="lab">Access length</span><div id="lenPick"></div></div>`,
+      onOpen(bg){
+        const chips = bg.querySelector('#chips'), inp = bg.querySelector('#emIn');
+        const draw = () => {
+          chips.querySelectorAll('.em-chip').forEach(c => c.remove());
+          emails.forEach((e, i) => inp.insertAdjacentHTML('beforebegin', `<span class="em-chip${valid(e) ? '' : ' bad'}">${esc(e)}<button type="button" data-rmem="${i}" aria-label="Remove ${esc(e)}">${ico('x')}</button></span>`));
+        };
+        const commit = () => { inp.value.split(/[,\s;]+/).map(s => s.trim()).filter(Boolean).forEach(e => { if (!emails.includes(e)) emails.push(e); }); inp.value = ''; draw(); };
+        inp.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ',' || e.key === ' '){ if (inp.value.trim()){ e.preventDefault(); commit(); } else if (e.key === 'Enter') { e.preventDefault(); } }
+          if (e.key === 'Backspace' && !inp.value && emails.length){ emails.pop(); draw(); }
+        });
+        inp.addEventListener('blur', commit);
+        inp.addEventListener('paste', () => setTimeout(commit));
+        chips.addEventListener('click', e => { const r = e.target.closest('[data-rmem]'); if (r){ e.stopPropagation(); emails.splice(+r.dataset.rmem, 1); draw(); } inp.focus(); });
+        bg.querySelector('.role-pick').onclick = e => { const b = e.target.closest('[data-rp]'); if (!b) return; role = b.dataset.rp; bg.querySelectorAll('[data-rp]').forEach(x => x.setAttribute('aria-checked', x === b)); };
+        getLen = lengthPicker(bg.querySelector('#lenPick'), undefined);
+        bg.querySelector('form') && null;
+        bg._commit = commit; bg._emails = () => emails;
+      },
+      onOk(bg){
+        bg._commit();
+        const list = bg._emails(), msg = bg.querySelector('#chips').closest('.field').querySelector('.msg');
+        const bad = list.filter(e => !valid(e)), taken = list.filter(e => X.all().some(m => m.email.toLowerCase() === e.toLowerCase()));
+        let err = !list.length ? 'Add at least one email address.' : bad.length ? `Check ${bad.join(', ')}. ${bad.length === 1 ? 'It doesn’t' : 'They don’t'} look like an email address.` : taken.length ? `${taken.join(', ')} already ${taken.length === 1 ? 'has' : 'have'} access or an invite.` : '';
+        bg.querySelector('#chips').classList.toggle('err', !!err); msg.hidden = !err; msg.textContent = err;
+        if (err){ bg.querySelector('#emIn').focus(); return false; }
+        const added = X.invite({emails:list, role, until:getLen()});
+        render(); toast(added.length === 1 ? `Invite sent to ${added[0].email}` : `${added.length} invites sent`);
+      }});
+  }
+
+  /* ---------- Events ---------- */
+  $('#share').onclick = shareDialog;
+  $('#q').addEventListener('input', e => { q = e.target.value; render(); });
+  document.querySelector('.layout').addEventListener('click', e => {
+    const rb = e.target.closest('[data-role]'); if (rb){ e.stopPropagation(); return roleMenu(rb, X.get(rb.dataset.role)); }
+    const pm = e.target.closest('[data-pmenu]');
+    if (pm){ e.stopPropagation(); const m = X.get(pm.dataset.pmenu);
+      return menu(pm, [{icon:'clock', label:'Change access length', run: () => lengthDialog(m)}, '-', {icon:'trash', label:'Remove access', danger:true, run: () => removeDialog(m)}]); }
+    const rs = e.target.closest('[data-resend]'); if (rs){ const m = X.get(rs.dataset.resend); X.resend(m.id); render(); toast(`Invite resent to ${m.email}`); return; }
+    const cn = e.target.closest('[data-cancel]');
+    if (cn){ const m = X.get(cn.dataset.cancel);
+      dialog({title:`Cancel the invite to ${esc(m.email)}?`, ok:'Cancel invite', danger:true, size:'sm', body:`<p>The invite link will stop working. You can invite them again later.</p>`,
+        onOk(){ X.remove(m.id); render(); toast(`Invite to ${m.email} cancelled`); }}); }
+  });
+  render();
+  if (location.hash === '#share'){ history.replaceState(null, '', location.pathname); shareDialog(); }
+})();
+</script>
+</body>
+</html>

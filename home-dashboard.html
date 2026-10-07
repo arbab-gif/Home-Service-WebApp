@@ -110,26 +110,49 @@ svg.i.accent,.drop svg.i{color:var(--icon)}
 .dlg-b{padding:8px 20px 4px;display:grid;gap:18px}
 .row{display:grid;gap:8px}
 .lbl{font-size:13px;font-weight:600}
-.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.opt{text-align:left;padding:12px 14px;border:1px solid var(--line-2);border-radius:8px;display:grid;gap:3px}
-.opt:hover{border-color:var(--ink-3)}
-.opt b{font-weight:600}
-.opt span{font-size:12.5px;color:var(--ink-3);line-height:1.4}
-.opt[aria-pressed="true"]{border-color:var(--brand);background:var(--brand-tint);box-shadow:0 0 0 1px var(--brand) inset}
+/* Add document: choice toggle, steps, drop zone, file rows */
+.seg-choice{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px;background:var(--seg-track);border-radius:12px}
+.opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;text-align:left;color:var(--ink-2);border:0;transition:background .15s,box-shadow .15s}
+.opt:hover{color:var(--ink)}
+.opt:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.opt b{display:block;font-weight:600;font-size:14px}
+.opt small{display:block;font-size:12px;color:var(--ink-3)}
+.opt .oi{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);flex:none}
+.opt .oi svg.i{width:16px;height:16px;color:var(--ink-3)}
+.opt[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(20,32,46,.12)}
+.opt[aria-pressed="true"] .oi{background:var(--brand-tint);border-color:transparent}
+.opt[aria-pressed="true"] .oi svg.i{color:var(--brand)}
+.step{animation:stepin .2s ease}
+@keyframes stepin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .picks{display:flex;flex-wrap:wrap;gap:8px}
-.pick{height:32px;padding:0 14px;border-radius:16px;border:1px solid var(--line-2);font-size:13px;font-weight:500;color:var(--ink-2)}
+.pick{height:34px;padding:0 14px;border-radius:17px;border:1px solid var(--line-2);font-size:13.5px;font-weight:500;color:var(--ink-2);background:var(--surface)}
 .pick:hover{border-color:var(--ink-3);color:var(--ink)}
 .pick[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
-.dlg select{height:36px;border:1px solid var(--line-2);border-radius:6px;background:var(--surface);color:var(--ink);font:inherit;padding:0 10px}
-.drop{position:relative;display:grid;justify-items:center;gap:4px;padding:22px 16px;border:1.5px dashed var(--line-2);border-radius:8px;text-align:center;cursor:pointer;color:var(--ink-2)}
-.drop:hover,.drop.over{border-color:var(--icon);background:var(--fresh)}
+.sel-wrap{position:relative;display:block}
+.sel-wrap::after{content:"";position:absolute;right:12px;top:50%;width:16px;height:16px;margin-top:-8px;background:var(--ink-3);pointer-events:none;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center/contain no-repeat}
+.dlg .sel-wrap select{width:100%;height:40px;padding:0 38px 0 12px;appearance:none;-webkit-appearance:none;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;cursor:pointer}
+.dlg .sel-wrap select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint)}
+.drop{position:relative;display:grid;justify-items:center;gap:6px;padding:26px 16px 22px;border:1.5px dashed var(--line-2);border-radius:12px;text-align:center;cursor:pointer;color:var(--ink-2);background:var(--hover);transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--brand);background:var(--brand-tint)}
+.drop:focus-within{border-color:var(--brand)}
 .drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.drop-ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);box-shadow:0 2px 6px rgba(20,32,46,.06);margin-bottom:2px;transition:transform .2s}
+.drop.over .drop-ic{transform:translateY(-3px)}
+.drop-ic svg.i{width:20px;height:20px;color:var(--icon)}
+.drop-t{font-size:14px}
 .drop u{color:var(--brand);text-decoration:none;font-weight:600}
 .drop small{color:var(--ink-3);font-size:12px}
 .up-files{list-style:none;margin:0;padding:0;display:grid;gap:6px}
-.up-files li{display:flex;align-items:center;gap:10px;font-size:13px}
-.up-files .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.up-files li small{color:var(--ink-3)}
+.up-files:empty{display:none}
+.up-files li{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 10px;border:1px solid var(--line);border-radius:9px;font-size:13.5px;background:var(--surface)}
+.up-files .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.up-files li small{color:var(--ink-3);white-space:nowrap}
+.up-files .rm{width:28px;height:28px;border-radius:6px;display:grid;place-items:center}
+.up-files .rm:hover{background:var(--hover)}
+.up-files .rm svg.i{width:14px;height:14px}
+@media (max-width:560px){.seg-choice{grid-template-columns:1fr}}
 .dlg-f{display:flex;align-items:center;gap:8px;padding:16px 20px;border-top:1px solid var(--line);margin-top:14px}
 .dlg-f .hint{flex:1;font-size:12.5px;color:var(--ink-3)}
 .btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
@@ -181,7 +204,7 @@ svg.i.accent,.drop svg.i{color:var(--icon)}
 .prop .btn svg.i{color:#fff;width:17px;height:17px}
 .mp-logo{width:18px;height:18px;flex:none}
 .prop .btn:hover{background:rgba(12,26,46,.8)}
-.facts{display:flex;margin:22px 0 0;border-top:1px solid var(--hero-rule)}
+.facts{display:flex;margin:46px 0 0;border-top:1px solid var(--hero-rule)}
 .facts div{padding:13px 18px 15px 0;flex:1 1 auto}
 .facts dd{white-space:nowrap}
 .facts div+div{padding-left:18px;border-left:1px solid var(--hero-rule)}
@@ -331,8 +354,11 @@ td.c{color:var(--ink-2);white-space:nowrap}
 .people .who{flex:1;min-width:0}
 .people .who b{font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .people .who span{font-size:12.5px;color:var(--ink-3);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.people .role{font-size:13px;color:var(--ink-2);display:flex;align-items:center;gap:3px;padding:4px 6px;border-radius:5px;white-space:nowrap}
-.people .role:hover,.people .role[aria-expanded="true"]{background:var(--hover)}
+/* Same role control as the Property access screen */
+.people .role{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 10px 0 12px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--ink);font-size:13.5px;font-weight:500;white-space:nowrap;flex:none}
+.people .role svg.i{width:15px;height:15px}
+span.role{background:var(--brand-tint)!important;border-color:transparent!important;color:var(--brand)!important;font-weight:600!important;padding:0 12px!important}
+.people button.role:hover,.people button.role[aria-expanded="true"]{border-color:var(--ink-3)}
 .role-menu{position:absolute;z-index:40;width:250px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(15,22,30,.14);padding:4px}
 .role-menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 10px;border-radius:6px}
 .role-menu button:hover,.role-menu button:focus-visible{background:var(--hover);outline:none}
@@ -402,10 +428,10 @@ td.c{color:var(--ink-2);white-space:nowrap}
     <nav class="nav" aria-label="Main">
       <a href="home-dashboard.html" data-sec="" aria-current="page">Overview</a>
       <a href="spaces.html">Spaces</a>
-      <a href="#documents" data-sec="documents">Documents</a>
-      <a href="#checklists" data-sec="checklists">Checklists<span class="nav-n">4</span></a>
-      <a href="#activity" data-sec="activity">Recent activity</a>
-      <a href="#access" data-sec="access">Property access</a>
+      <a href="documents.html">Documents</a>
+      <a href="checklists.html">Checklists<span class="nav-n">4</span></a>
+      <a href="activity.html">Activity</a>
+      <a href="access.html">Property access</a>
     </nav>
     <div class="top-r">
       <button class="bell" aria-label="Notifications (12 unread)"><svg class="i" style="width:18px;height:18px"><use href="#i-bell"/></svg><i></i></button>
@@ -500,13 +526,13 @@ td.c{color:var(--ink-2);white-space:nowrap}
             <tbody id="docs"></tbody>
           </table>
         </div>
-        <div class="foot"><span id="docCount"></span><a class="more" href="#">Open documentation</a></div>
+        <div class="foot"><span id="docCount"></span><a class="more" href="documents.html">Open documentation</a></div>
       </section>
     </div>
 
     <div class="col">
       <section class="card" id="checklists">
-        <div class="head"><h2>Checklists</h2><a class="more" href="#">View all</a></div>
+        <div class="head"><h2>Checklists</h2><a class="more" href="checklists.html">View all</a></div>
         <div class="seg-wrap"><div class="seg" role="tablist" id="clTabs">
           <button role="tab" aria-selected="true" data-v="active">Active (4)</button>
           <button role="tab" aria-selected="false" data-v="done">Completed (12)</button>
@@ -515,27 +541,13 @@ td.c{color:var(--ink-2);white-space:nowrap}
       </section>
 
       <section class="card" id="activity">
-        <div class="head"><h2>Recent activity</h2><a class="more" href="#">View all</a></div>
-        <ul class="feed">
-          <li><span class="av av-brady" role="img" aria-label="Brady Ricci"></span><p><b>You</b> checked off <a href="#">Replace batteries in outdoor cameras</a><time>Today, 2:14 PM</time></p></li>
-          <li><span class="av av-alice" role="img" aria-label="Alice Johnson"></span><p><b>Alice Johnson</b> added <a href="#">Furnace service invoice.pdf</a> to Mechanical room<time>Today, 11:02 AM</time></p></li>
-          <li><span class="av av-brady" role="img" aria-label="Brady Ricci"></span><p><b>You</b> checked off <a href="#">Put sleds back in attic over garage</a><time>Yesterday, 5:40 PM</time></p></li>
-          <li><span class="av av-hrk" role="img" aria-label="Home Record Keeper team"></span><p><b>Home Record Keeper</b> assigned <a href="#">Winterization</a><time>Yesterday, 9:15 AM</time></p></li>
-          <li><span class="av av-mike" role="img" aria-label="Michael Brown"></span><p><b>Michael Brown</b> viewed <a href="#">Homeowners policy 2026–27.pdf</a><time>Oct 5, 4:48 PM</time></p></li>
-          <li><span class="av av-brady" role="img" aria-label="Brady Ricci"></span><p><b>You</b> shared access with <a href="#">alex@gmail.com</a> as Viewer<time>Oct 4, 8:30 PM</time></p></li>
-          <li><span class="av av-alice" role="img" aria-label="Alice Johnson"></span><p><b>Alice Johnson</b> added <a href="#">Hot tub</a> to Deck and hot tub › Lower deck<time>Oct 3, 1:12 PM</time></p></li>
-          <li><span class="av av-brady" role="img" aria-label="Brady Ricci"></span><p><b>You</b> completed <a href="#">Main floor inspection</a><time>Oct 2, 10:05 AM</time></p></li>
-        </ul>
+        <div class="head"><h2>Recent activity</h2><a class="more" href="activity.html">View all</a></div>
+        <ul class="feed" id="actFeed"></ul>
       </section>
 
       <section class="card" id="access">
-        <div class="head"><h2>Property access</h2><button class="btn primary"><svg class="i"><use href="#i-plus"/></svg>Share</button></div>
-        <ul class="people">
-          <li><span class="av av-brady" role="img" aria-label="Brady Ricci"></span><div class="who"><b>Brady Ricci (you)</b><span>trusttheprocess58@gmail.com</span></div><span class="role">Owner</span></li>
-          <li><span class="av av-alice" role="img" aria-label="Alice Johnson"></span><div class="who"><b>Alice Johnson</b><span>alice@yahoo.com · until Nov 6</span></div><button class="role" data-name="Alice Johnson" data-role="Editor" aria-haspopup="menu">Editor<svg class="i" style="width:14px;height:14px"><use href="#i-down"/></svg></button></li>
-          <li><span class="av av-mike" role="img" aria-label="Michael Brown"></span><div class="who"><b>Michael Brown</b><span>mike@hotmail.com · until Nov 6</span></div><button class="role" data-name="Michael Brown" data-role="Viewer" aria-haspopup="menu">Viewer<svg class="i" style="width:14px;height:14px"><use href="#i-down"/></svg></button></li>
-          <li><span class="av av-ghost" role="img" aria-label="Invite not accepted yet"></span><div class="who"><b>alex@gmail.com</b><span>Invited 3 days ago, not accepted yet</span></div><button class="role" data-name="alex@gmail.com" data-role="Viewer" data-pending="1" aria-haspopup="menu">Viewer<svg class="i" style="width:14px;height:14px"><use href="#i-down"/></svg></button></li>
-        </ul>
+        <div class="head"><h2>Property access</h2><a class="more" href="access.html">View all</a></div>
+        <ul class="people" id="accList"></ul>
       </section>
     </div>
   </div>
@@ -549,27 +561,27 @@ td.c{color:var(--ink-2);white-space:nowrap}
     </div>
     <div class="dlg-b">
       <div class="row">
-        <label class="lbl">What is this document for?</label>
-        <div class="opts" id="upType">
-          <button type="button" class="opt" data-t="item" aria-pressed="false"><b>An item</b><span>Warranties, invoices and manuals for things in the home, like the furnace or dishwasher</span></button>
-          <button type="button" class="opt" data-t="property" aria-pressed="false"><b>The property</b><span>Legal papers, insurance, tax and permits for Vail Residence itself</span></button>
+        <span class="lbl">What is this document for?</span>
+        <div class="seg-choice" id="upType" role="radiogroup" aria-label="Document type">
+          <button type="button" class="opt" data-t="item" role="radio" aria-pressed="false"><span class="oi"><svg class="i"><use href="#i-box"/></svg></span><span><b>An item</b><small>Warranty, invoice or manual</small></span></button>
+          <button type="button" class="opt" data-t="property" role="radio" aria-pressed="false"><span class="oi"><svg class="i"><use href="#i-house"/></svg></span><span><b>The property</b><small>Legal, insurance, tax or permit</small></span></button>
         </div>
       </div>
-      <div class="row" id="upCatRow" hidden>
-        <label class="lbl">Category</label>
-        <div class="picks" id="upCats"></div>
+      <div class="row step" id="upCatRow" hidden>
+        <span class="lbl">Folder</span>
+        <div class="picks" id="upCats" role="radiogroup" aria-label="Folder"></div>
       </div>
-      <div class="row" id="upItemRow" hidden>
-        <label class="lbl" for="upItem">Item</label>
-        <select id="upItem"></select>
+      <div class="row step" id="upItemRow" hidden>
+        <label class="lbl" for="upItem">Which item?</label>
+        <span class="sel-wrap"><select id="upItem"></select></span>
       </div>
       <div class="row">
-        <label class="lbl" for="upInput">File</label>
+        <span class="lbl">Files</span>
         <label class="drop" id="upDrop">
-          <input type="file" id="upInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.heic">
-          <svg class="i" style="width:22px;height:22px"><use href="#i-upload"/></svg>
-          <span><b>Drop files here</b> or <u>browse</u></span>
-          <small>PDF, Word, Excel or photos, up to 25 MB each</small>
+          <input type="file" id="upInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.heic" aria-label="Choose files">
+          <span class="drop-ic"><svg class="i"><use href="#i-upload"/></svg></span>
+          <span class="drop-t"><b>Drag files here</b> or <u>browse</u></span>
+          <small>PDF, Word, Excel or photos · up to 25 MB each</small>
         </label>
         <ul class="up-files" id="upFiles"></ul>
       </div>
@@ -673,7 +685,7 @@ td.c{color:var(--ink-2);white-space:nowrap}
     $('#rooms').innerHTML = list.map(s => {
       const i = s.items.length;
       const tag = f === 'all' ? `<span class="floor-tag">${FLOOR[s.floor] || ''}</span>` : '';
-      const meta = `<span class="room-txt"><b>${esc(s.name)}</b><span class="meta"><span>${HRK.ico('sub')}${plural(s.subs.length,'subspace')}</span><span>${HRK.ico('box')}${plural(i,'item')}</span></span></span>`;
+      const meta = `<span class="room-txt"><b>${esc(s.name)}</b><span class="meta"><span>${HRK.ico('sub')}${plural(s.subs.length,'sub-space')}</span><span>${HRK.ico('box')}${plural(i,'item')}</span></span></span>`;
       if (s.photo) return `
       <a class="room" href="space.html#${s.id}">
         <span class="thumb has-photo"><img src="${esc(s.photo)}" alt="" loading="lazy" width="560" height="350" style="object-position:${s.pos || '50% 50%'}">${tag}</span>
@@ -709,92 +721,61 @@ td.c{color:var(--ink-2);white-space:nowrap}
   });
   drawRooms('all');
 
-  /* Documents belong either to an item in the home or to the property itself; each type has its own categories */
-  const CATS = {
-    item: ['Warranty', 'Invoice', 'Manual'],
-    property: ['Legal', 'Insurance', 'Tax', 'Permit']
-  };
-  /* [item, space, subspace] — subspace is optional; an item can sit directly in a space */
-  const ITEMS = [
-    ['Lennox furnace', 'Mechanical room', 'Furnace bay'], ['Rheem water heater', 'Mechanical room', 'Utility closet'],
-    ['Sub-Zero refrigerator', 'Kitchen', ''], ['Bosch dishwasher', 'Kitchen', "Butler's pantry"],
-    ['Hot tub', 'Deck and hot tub', 'Lower deck'], ['Snowblower', 'Garage', 'Storage bay'], ['Washer and dryer', 'Laundry', '']
-  ];
-  const itemOf = name => ITEMS.find(i => i[0] === name) || [name, '', ''];
+  /* Recent documents: read from the shared document store (assets/hrk.js), same data as the Documents screen */
+  const D = HRK.docs;
   const crumb = '<svg class="i crumb" aria-hidden="true"><use href="#i-right"/></svg>';
-  function itemPath(name){
-    const [item, space, sub] = itemOf(name);
-    return [space, sub].filter(Boolean).map(s => `<span>${s}</span>`).join(crumb) + crumb + `<b>${item}</b>`;
-  }
-  const docs = [
-    {n:'Lennox furnace warranty.pdf', type:'item', cat:'Warranty', item:'Lennox furnace', date:'Oct 6'},
-    {n:'Homeowners policy 2026–27.pdf', type:'property', cat:'Insurance', date:'Oct 7'},
-    {n:'Furnace service invoice.pdf', type:'item', cat:'Invoice', item:'Lennox furnace', date:'Oct 7'},
-    {n:'Warranty deed, 123 Alpine Dr.pdf', type:'property', cat:'Legal', date:'Sep 30'},
-    {n:'Sub-Zero BI-36 use and care.pdf', type:'item', cat:'Manual', item:'Sub-Zero refrigerator', date:'Sep 28'},
-    {n:'Hot tub cover receipt.jpg', type:'item', cat:'Invoice', item:'Hot tub', date:'Sep 22', thumb:'assets/rooms/deck-hot-tub.jpg'},
-    {n:'Home contents inventory.xlsx', type:'property', cat:'Insurance', date:'Sep 18'},
-    {n:'HOA covenants and rules.docx', type:'property', cat:'Legal', date:'Sep 10'},
-  ];
-  const fmt = n => n.split('.').pop().toLowerCase();
-  function fileIcon(d){
-    const f = fmt(d.n);
-    if ((f === 'jpg' || f === 'png') && d.thumb) return `<span class="ficon ficon-img"><img src="${d.thumb}" alt=""><b>${f.toUpperCase()}</b></span>`;
-    return `<span class="ficon f-${f}"><svg viewBox="0 0 32 40" aria-hidden="true"><path d="M3 2h18l8 8v26a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" class="pg"/><path d="M21 2v6a2 2 0 0 0 2 2h6" class="fold"/></svg><b>${f.toUpperCase()}</b></span>`;
-  }
+  const pathHtml = d => { const p = D.where(d).path; return p.slice(0, -1).map(s => `<span>${esc(s)}</span>`).join(crumb) + (p.length > 1 ? crumb : '') + `<b>${esc(p[p.length - 1])}</b>`; };
   let docType = 'all';
   function fillCatFilter(){
-    const opts = docType === 'all' ? [...CATS.item, ...CATS.property] : CATS[docType];
-    $('#docCat').innerHTML = `<option value="all">All categories</option>` + opts.map(c => `<option>${c}</option>`).join('');
+    const opts = docType === 'all' ? [...D.folders('item'), ...D.folders('property')] : D.folders(docType);
+    $('#docCat').innerHTML = `<option value="all">All categories</option>` + opts.map(c => `<option>${esc(c)}</option>`).join('');
   }
   function drawDocs(){
     const q = $('#docSearch').value.trim().toLowerCase(), c = $('#docCat').value;
     $('#docType').parentNode.classList.toggle('on', docType !== 'all'); $('#docCat').parentNode.classList.toggle('on', c !== 'all');
-    const list = docs.filter(d => (docType === 'all' || d.type === docType) && (c === 'all' || d.cat === c) &&
-      (!q || d.n.toLowerCase().includes(q) || (d.item ? itemOf(d.item).join(' ') : '').toLowerCase().includes(q)));
+    const list = [...D.all()].sort((a, b) => b.date.localeCompare(a.date))
+      .filter(d => (docType === 'all' || d.type === docType) && (c === 'all' || d.folder === c) &&
+        (!q || d.name.toLowerCase().includes(q) || D.where(d).label.toLowerCase().includes(q)))
+      .slice(0, 8);
     $('#docs').innerHTML = list.length ? list.map(d => `
       <tr${d.fresh ? ' class="fresh"' : ''}>
-        <td style="max-width:0;width:52%"><div class="fname">${fileIcon(d)}<div style="min-width:0">
-          <span class="dn"><a href="#" title="${d.n}">${d.n}</a></span>
-          <span class="ctx">${d.type === 'item'
-            ? `<span class="path" title="${itemOf(d.item).filter(Boolean).join(' › ')}">${itemPath(d.item)}</span>`
-            : `Vail Residence`}</span>
+        <td style="max-width:0;width:52%"><div class="fname">${HRK.fileIcon(d)}<div style="min-width:0">
+          <span class="dn"><a href="documents.html#${d.type}-${d.folder.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" title="${esc(d.name)}">${esc(d.name)}</a></span>
+          <span class="ctx">${d.type === 'item' ? `<span class="path" title="${esc(D.where(d).label)}">${pathHtml(d)}</span>` : `Vail Residence`}</span>
         </div></div></td>
         <td class="hide-sm">${d.type === 'item' ? '<span class="for for-item">Item</span>' : '<span class="for for-prop">Property</span>'}</td>
-        <td class="c hide-sm">${d.cat}</td>
-        <td class="c">${d.date}</td>
-        <td style="width:1%"><button class="dots" aria-label="Actions for ${d.n}"><svg class="i"><use href="#i-more"/></svg></button></td>
+        <td class="c hide-sm">${esc(d.folder)}</td>
+        <td class="c">${D.fmtDate(d.date)}</td>
+        <td style="width:1%"><button class="dots" aria-label="Actions for ${esc(d.name)}"><svg class="i"><use href="#i-more"/></svg></button></td>
       </tr>`).join('') : `<tr><td colspan="5" class="c" style="padding:20px">No documents match these filters.</td></tr>`;
-    $('#docCount').textContent = (docType === 'all' && c === 'all' && !q) ? `Showing the ${list.length} most recent` : plural(list.length, 'result');
+    $('#docCount').textContent = (docType === 'all' && c === 'all' && !q) ? `Showing the ${list.length} most recent of ${D.all().length}` : plural(list.length, 'result');
   }
   $('#docType').onchange = e => { docType = e.target.value; fillCatFilter(); drawDocs(); };
   $('#docSearch').oninput = drawDocs; $('#docCat').onchange = drawDocs;
   fillCatFilter(); drawDocs();
 
-  /* Add document: type → category (→ item) → file */
+  /* Add document: type → folder (→ item) → file; saves to the shared store */
   const dlg = $('#docDlg'), up = {type:null, cat:null, item:'', files:[]};
   function drawUpload(){
-    document.querySelectorAll('#upType .opt').forEach(o => o.setAttribute('aria-pressed', o.dataset.t === up.type));
+    document.querySelectorAll('#upType .opt').forEach(o => { o.setAttribute('aria-pressed', o.dataset.t === up.type); o.setAttribute('aria-checked', o.dataset.t === up.type); });
     $('#upCatRow').hidden = !up.type;
     $('#upItemRow').hidden = up.type !== 'item';
-    if (up.type) $('#upCats').innerHTML = CATS[up.type].map(c => `<button type="button" class="pick" aria-pressed="${c === up.cat}">${c}</button>`).join('');
-    $('#upFiles').innerHTML = up.files.map(f => `<li>${fileIcon({n:f.name})}<span class="nm">${f.name}</span><small>${Math.max(1, Math.round(f.size/1024))} KB</small></li>`).join('');
+    if (up.type) $('#upCats').innerHTML = D.folders(up.type).map(c => `<button type="button" class="pick" aria-pressed="${c === up.cat}">${esc(c)}</button>`).join('');
+    $('#upFiles').innerHTML = up.files.map((f, i) => `<li>${HRK.fileIcon({name:f.name})}<span class="nm">${esc(f.name)}</span><small>${D.fmtSize(f.size / 1024)}</small><button type="button" class="rm" data-rmf="${i}" aria-label="Remove ${esc(f.name)}"><svg class="i"><use href="#i-x"/></svg></button></li>`).join('');
+    $('#upSubmit').textContent = up.files.length > 1 ? `Upload ${up.files.length} files` : 'Upload';
     const ok = up.type && up.cat && up.files.length && (up.type === 'property' || up.item);
     $('#upSubmit').disabled = !ok;
-    $('#upHint').textContent = !up.type ? 'Choose what the document is for.' : !up.cat ? 'Pick a category.' :
-      (up.type === 'item' && !up.item) ? 'Choose the item.' : !up.files.length ? 'Add at least one file.' : '';
+    $('#upHint').textContent = !up.type ? 'Start by choosing what it’s for' : !up.cat ? 'Pick a folder' :
+      (up.type === 'item' && !up.item) ? 'Choose the item' : !up.files.length ? 'Add at least one file' : 'Ready to upload';
   }
   function openUpload(){
     Object.assign(up, {type:null, cat:null, item:'', files:[]});
-    $('#upItem').value = ''; $('#upInput').value = '';
+    $('#upItem').innerHTML = `<option value="">Select an item</option>` +
+      Object.entries(D.itemGroups()).map(([g, items]) => `<optgroup label="${esc(g)}">${items.map(i => `<option value="${esc(i.space + '|' + i.name)}">${esc(i.name)}</option>`).join('')}</optgroup>`).join('');
+    $('#upInput').value = '';
     dlg.hidden = false; drawUpload(); $('#upType .opt').focus();
   }
   const closeUpload = () => { dlg.hidden = true; $('#addDocBtn').focus(); };
-  /* Item picker grouped by where the item lives: Space › Subspace */
-  const groups = {};
-  ITEMS.forEach(([item, space, sub]) => (groups[[space, sub].filter(Boolean).join(' › ')] ||= []).push(item));
-  $('#upItem').innerHTML = `<option value="">Select an item</option>` +
-    Object.entries(groups).map(([g, items]) => `<optgroup label="${g}">${items.map(i => `<option value="${i}">${i}</option>`).join('')}</optgroup>`).join('');
   $('#addDocBtn').onclick = openUpload;
   $('#upClose').onclick = closeUpload; $('#upCancel').onclick = closeUpload;
   dlg.addEventListener('click', e => { if (e.target === dlg) closeUpload(); });
@@ -802,25 +783,42 @@ td.c{color:var(--ink-2);white-space:nowrap}
   $('#upType').onclick = e => { const o = e.target.closest('.opt'); if (!o) return; if (up.type !== o.dataset.t) up.cat = null; up.type = o.dataset.t; drawUpload(); };
   $('#upCats').onclick = e => { const b = e.target.closest('.pick'); if (!b) return; up.cat = b.textContent; drawUpload(); };
   $('#upItem').onchange = e => { up.item = e.target.value; drawUpload(); };
-  $('#upInput').onchange = e => { up.files = [...e.target.files]; drawUpload(); };
+  $('#upInput').onchange = e => { up.files = [...up.files, ...e.target.files]; e.target.value = ''; drawUpload(); };
+  $('#upFiles').onclick = e => { const r = e.target.closest('[data-rmf]'); if (!r) return; up.files.splice(+r.dataset.rmf, 1); drawUpload(); };
   const dz = $('#upDrop');
   ['dragenter','dragover'].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.add('over'); }));
   ['dragleave','drop'].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.remove('over'); }));
   dz.addEventListener('drop', e => { up.files = [...e.dataTransfer.files]; drawUpload(); });
-  $('#upForm').onsubmit = e => {
+  $('#upForm').onsubmit = async e => {
     e.preventDefault();
-    up.files.slice().reverse().forEach(f => docs.unshift({n:f.name, type:up.type, cat:up.cat, item:up.type === 'item' ? up.item : undefined, date:'Just now', fresh:true}));
+    const [space, item] = up.type === 'item' ? up.item.split('|') : ['', ''];
+    for (const f of up.files.slice().reverse()){
+      let thumb = null; if (f.type.startsWith('image/')) { try { thumb = await HRK.readPhoto(f, 600); } catch(_){} }
+      D.add({name:f.name, type:up.type, folder:up.cat, size:f.size / 1024, space, item, thumb});
+    }
     closeUpload();
     docType = 'all'; $('#docType').value = 'all';
     $('#docSearch').value = ''; fillCatFilter(); drawDocs();
-    toast(`${plural(up.files.length, 'document')} added to ${up.type === 'item' ? up.item : 'Vail Residence'} · ${up.cat}`);
-  };
-  /* Property access: role menu → confirm → apply */
+    toast(`${plural(up.files.length, 'document')} added to ${up.type === 'item' ? item : 'Vail Residence'} · ${up.cat}`);
+  };  /* Property access: role menu → confirm → apply */
   const rm = $('#roleMenu'), cf = $('#confirmDlg');
   let roleBtn = null, cfAction = null;
   const RIGHTS = {Editor:'add, edit and upload records', Viewer:'see records but not change anything'};
+  const XS = HRK.access;
+  function drawAccess(){
+    const sub = m => m.status === 'pending' ? `Invited ${HRK.docs.fmtDate(m.invited)}, not accepted yet` : `${esc(m.email)}${m.until ? ' · until ' + HRK.docs.fmtDate(m.until) : ''}`;
+    const rows = [...XS.active(), ...XS.pending()];
+    $('#accList').innerHTML = rows.map(m => {
+      const av = XS.avatar(m), label = XS.ROLES[m.role].label;
+      return `<li><span class="av${av ? '' : ' av-ghost'}" role="img" aria-label="${esc(XS.display(m))}"${av ? ` style="background-image:url('${av}')"` : ''}></span>
+        <div class="who"><b>${esc(XS.display(m))}${m.id === 'brady' ? ' (you)' : ''}</b><span>${sub(m)}</span></div>
+        ${m.role === 'owner' ? '<span class="role">Owner</span>' : `<button class="role" data-id="${m.id}" data-name="${esc(XS.display(m))}" data-role="${label}"${m.status === 'pending' ? ' data-pending="1"' : ''} aria-haspopup="menu">${label}<svg class="i" style="width:14px;height:14px"><use href="#i-down"/></svg></button>`}</li>`;
+    }).join('');
+  }
+  drawAccess();
   function closeRoleMenu(){ rm.hidden = true; roleBtn?.setAttribute('aria-expanded', 'false'); }
-  document.querySelectorAll('.people button.role').forEach(b => b.addEventListener('click', e => {
+  $('#accList').addEventListener('click', e => {
+    const b = e.target.closest('button.role'); if (!b) return;
     e.stopPropagation();
     if (!rm.hidden && roleBtn === b) return closeRoleMenu();
     roleBtn = b; b.setAttribute('aria-expanded', 'true');
@@ -831,7 +829,7 @@ td.c{color:var(--ink-2);white-space:nowrap}
     rm.style.top = (r.bottom + scrollY + 4) + 'px';
     rm.style.left = Math.max(16, r.right + scrollX - rm.offsetWidth) + 'px';
     rm.querySelector('[aria-checked="true"]')?.focus();
-  }));
+  });
   document.addEventListener('click', e => { if (!rm.hidden && !rm.contains(e.target)) closeRoleMenu(); });
   function ask({title, body, ok, danger, run}){
     $('#cfTitle').textContent = title; $('#cfBody').innerHTML = body;
@@ -858,7 +856,7 @@ td.c{color:var(--ink-2);white-space:nowrap}
         body: pending ? `The invite link will stop working. You can invite them again later.`
                       : `<b>${name}</b> will no longer be able to see Vail Residence or any of its records. You can share access again later.`,
         ok: pending ? 'Cancel invite' : 'Remove access', danger: true,
-        run(){ const li = b.closest('li'); li.remove(); toast(pending ? `Invite to ${name} cancelled` : `${name} no longer has access`); }
+        run(){ XS.remove(b.dataset.id); drawAccess(); drawActivity(); toast(pending ? `Invite to ${name} cancelled` : `${name} no longer has access`); }
       });
     }
     ask({
@@ -866,8 +864,7 @@ td.c{color:var(--ink-2);white-space:nowrap}
       body: `<b>${name}</b> is currently a${from === 'Editor' ? 'n' : ''} ${from}. As ${to === 'Editor' ? 'an' : 'a'} ${to} they will be able to ${RIGHTS[to]} at Vail Residence.`,
       ok: `Change to ${to}`,
       run(){
-        b.dataset.role = to;
-        b.firstChild.textContent = to;
+        XS.setRole(b.dataset.id, to.toLowerCase()); drawAccess(); drawActivity();
         toast(`${name} is now ${to === 'Editor' ? 'an' : 'a'} ${to}`);
       }
     });
@@ -875,36 +872,35 @@ td.c{color:var(--ink-2);white-space:nowrap}
 
   function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(t._h); t._h = setTimeout(() => t.hidden = true, 3200); }
 
-  const lists = {
-    active: [
-      {n:'Routine work', src:'Monthly routine', created:'Sep 30, 2026', tasks:[['Replace batteries in all four outdoor cameras','Today',1],['Put sleds back up into attic over garage','Yesterday',1],['Clean grill and reinstall cover','',0]]},
-      {n:'Winterization', src:'Seasonal: fall', created:'Oct 6, 2026', tasks:[['Blow out irrigation lines'],['Drain exterior hose bibs'],['Install heat tape on north gutters'],['Service snowblower'],['Check attic insulation depth'],['Stake driveway edges']]},
-      {n:'Crawl space maintenance', src:'Crawl space maintenance', created:'Sep 12, 2026', tasks:[['Inspect vapor barrier seams'],['Check sump pump float'],['Look for rodent activity']]},
-      {n:'Main floor inspection', src:'Quarterly inspection', created:'Sep 28, 2026', tasks:[['Test smoke and CO detectors','Oct 2',1],['Check under-sink supply lines','Oct 2',1],['Inspect window seals','Oct 2',1]]},
-    ],
-    done: [
-      {n:'Spring opening', src:'Seasonal: spring', created:'Apr 20, 2026', tasks:[['Open hot tub','May 2',1],['Pull driveway stakes','May 2',1]]},
-      {n:'Gas leak on side of house', src:'Gas leak on side of house', created:'Aug 31, 2026', tasks:[['Gas company inspection','Sep 1',1]]},
-    ]
-  };
-  let view = 'active';
-  const openSet = new Set(['active-0']);
-  function ring(done, total){
-    const r = 9, c = 2*Math.PI*r, p = total ? done/total : 0;
-    const col = p === 1 ? 'var(--green)' : 'var(--brand)';
-    return `<svg class="ring" viewBox="0 0 22 22" aria-label="${done} of ${total} done"><circle cx="11" cy="11" r="${r}" fill="none" stroke="var(--line)" stroke-width="2.5"/><circle cx="11" cy="11" r="${r}" fill="none" stroke="${col}" stroke-width="2.5" stroke-dasharray="${c*p} ${c}" transform="rotate(-90 11 11)" stroke-linecap="round"/></svg>`;
+  /* Recent activity card: latest 8 from the shared feed (assets/hrk.js) */
+  function drawActivity(){
+    const A = HRK.activity;
+    const when = iso => { const lbl = A.dayLabel(iso); return (lbl === 'Today' || lbl === 'Yesterday' ? lbl : new Date(iso).toLocaleDateString('en-US', {month:'short', day:'numeric'})) + ', ' + A.time(iso); };
+    $('#actFeed').innerHTML = A.all().slice(0, 8).map(e => { const p = A.PEOPLE[e.who] || A.PEOPLE.brady;
+      return `<li><span class="av" role="img" aria-label="${esc(p.name)}" style="background-image:url('${p.avatar}')${p.logo ? ';background-color:var(--surface);background-size:72%;background-repeat:no-repeat;border:1px solid var(--line)' : ''}"></span><p><b>${esc(p.short)}</b> ${esc(e.verb)} <a href="activity.html">${esc(e.target)}</a><time>${when(e.at)}</time></p></li>`; }).join('');
   }
+  drawActivity();
+
+  /* Checklists card reads from the shared checklist store (same data as the Checklists screen) */
+  const CL = HRK.checklists;
+  let view = 'active';
+  const openSet = new Set();
   function drawLists(){
-    $('#lists').innerHTML = lists[view].map((l,i) => {
-      const key = view + '-' + i, open = openSet.has(key);
-      const done = l.tasks.filter(t => t[2]).length, total = l.tasks.length;
+    const act = CL.active(), comp = CL.completed();
+    if (!openSet.size && act[0]) openSet.add(act[0].id);
+    document.querySelector('#clTabs [data-v="active"]').textContent = `Active (${act.length})`;
+    document.querySelector('#clTabs [data-v="done"]').textContent = `Completed (${comp.length})`;
+    const list = (view === 'active' ? act : comp).slice(0, 4);
+    $('#lists').innerHTML = list.map(l => {
+      const open = openSet.has(l.id), {done, total} = CL.progress(l), locked = l.status === 'completed';
       return `<div class="cl${open?' open':''}">
-        <button class="cl-h" data-k="${key}" aria-expanded="${open}">
-          <span class="t"><b>${l.n}</b><span class="cl-meta2"><span><svg class="i"><use href="#i-repeat"/></svg>${l.src}</span><span><svg class="i"><use href="#i-cal"/></svg>${l.created}</span><span>${plural(total, 'task')}</span></span><span class="pline${done===total?' full':''}"><span class="pbar"><i style="width:${total?Math.round(done/total*100):0}%"></i></span><span class="pfrac">${done}/${total}</span></span></span>
+        <button class="cl-h" data-k="${l.id}" aria-expanded="${open}">
+          <span class="t"><b>${esc(l.name)}</b><span class="cl-meta2"><span><svg class="i"><use href="#i-repeat"/></svg>${esc(CL.source(l))}</span><span><svg class="i"><use href="#i-cal"/></svg>${CL.fmtDate(l.created)}</span><span>${plural(total, 'task')}</span></span><span class="pline${total && done===total?' full':''}"><span class="pbar"><i style="width:${total?Math.round(done/total*100):0}%"></i></span><span class="pfrac">${done}/${total}</span></span></span>
           <svg class="i chev"><use href="#i-down"/></svg></button>
-        <ul class="tasks">${l.tasks.map((t,j) => `<li><label><input type="checkbox" data-p="${view}-${i}-${j}" ${t[2]?'checked':''}><span><span class="tx">${t[0]}</span>${t[2]&&t[1]?`<small>Checked ${t[1].toLowerCase()==='today'||t[1].toLowerCase()==='yesterday'?t[1].toLowerCase():'on '+t[1]}</small>`:''}</span></label></li>`).join('')}</ul>
+        <ul class="tasks">${l.tasks.map(t => `<li><label><input type="checkbox" data-c="${l.id}" data-t="${t.id}" ${t.done?'checked':''} ${locked?'disabled':''}><span><span class="tx">${esc(t.text)}</span>${t.done && t.doneAt ? `<small>${CL.checkedLabel(t.doneAt)}</small>` : ''}</span></label></li>`).join('')}
+          <li><a class="more" href="checklists.html#c-${l.id}">Open checklist</a></li></ul>
       </div>`;
-    }).join('');
+    }).join('') || `<p class="muted" style="padding:16px 20px;margin:0">${view === 'active' ? 'No active checklists. <a class="more" href="checklists.html">Start one</a>' : 'No completed checklists yet.'}</p>`;
   }
   $('#lists').onclick = e => {
     const h = e.target.closest('.cl-h'); if (!h) return;
@@ -912,15 +908,16 @@ td.c{color:var(--ink-2);white-space:nowrap}
     drawLists();
   };
   $('#lists').onchange = e => {
-    const [v,i,j] = e.target.dataset.p.split('-'), t = lists[v][i].tasks[j];
-    t[2] = e.target.checked ? 1 : 0; t[1] = 'today';
-    drawLists();
+    const b = e.target; if (!b.dataset.t) return;
+    const finished = CL.toggle(b.dataset.c, b.dataset.t, b.checked);
+    drawLists(); drawActivity();
+    if (finished) toast(`${CL.get(b.dataset.c).name} is complete. Moved to Completed.`);
+    document.querySelectorAll('.nav .nav-n').forEach(n => n.textContent = CL.active().length);
   };
   $('#clTabs').onclick = e => {
     const b = e.target.closest('button'); if (!b) return;
     document.querySelectorAll('#clTabs button').forEach(x => x.setAttribute('aria-selected', x === b));
     view = b.dataset.v; drawLists();
-  };
-  drawLists();
+  };  drawLists();
 })();
 </script>

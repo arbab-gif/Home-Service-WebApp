@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="assets/base.css">
 <style>
-/* Layout: cover banner with actions; then Subspaces (photo cards) and Items (list filtered by subspace). */
+/* Layout: cover banner with actions; then two tabs: Items (linked directly to the space) and Sub-spaces (cards; the selected one lists its items below). */
 .hero{position:relative;border-radius:12px;overflow:hidden;min-height:220px;display:flex;align-items:flex-end;background:#1A3D69 center/cover no-repeat;color:#fff;margin-bottom:22px}
 .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(12,26,46,.88) 0%,rgba(12,26,46,.45) 50%,rgba(12,26,46,.1) 100%),linear-gradient(90deg,rgba(12,26,46,.55),rgba(12,26,46,0) 70%)}
 .hero.empty{background:var(--hover);color:var(--ink);border:1.5px dashed var(--line-2)}
@@ -30,47 +30,44 @@
 .hero.empty .gbtn.danger{color:var(--red)}
 .hero.empty .gbtn.danger svg.i{color:var(--red)}
 
-.sec{margin-bottom:22px}
 .subs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;padding:4px 20px 20px}
+/* Tabs */
+.tabbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.tabbar .seg button{height:34px;padding:0 16px;font-size:14px}
+#panel{display:grid;gap:16px}
+.panel-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 20px 14px}
+.panel-h h2{margin:0;font-size:15px;font-weight:600}
+.panel-h p{margin:2px 0 0;font-size:13px;color:var(--ink-3)}
+.panel-h .search{flex:0 1 280px}
+/* Selected sub-space items */
+.sub-items{animation:rise .25s ease}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .sub{position:relative;display:grid;gap:8px;min-width:0;text-align:left;border-radius:10px}
 .sub-btn{display:grid;gap:8px;text-align:left;border-radius:10px;min-width:0}
 .sub .thumb{transition:box-shadow .15s,border-color .15s}
 .sub-btn:hover .thumb{box-shadow:0 6px 18px rgba(20,32,46,.12)}
 .sub-btn:hover .thumb img{transform:scale(1.04)}
 .sub.on .thumb{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand)}
+.sub.on b{color:var(--brand)}
+.sub.on small{color:var(--brand);opacity:.8}
 .sub b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .sub small{font-size:12.5px;color:var(--ink-3)}
 .sub>.kebab{position:absolute;top:8px;right:8px}
 .sub:hover>.kebab{opacity:1}
-.sub .sel-tick{position:absolute;bottom:8px;left:8px;z-index:2;display:none;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:5px;background:var(--brand);color:#fff}
-.sub.on .sel-tick{display:inline-flex}
-.sub .sel-tick svg.i{color:#fff;width:12px;height:12px}
-.add-sub{display:grid;place-items:center;aspect-ratio:16/10;border:1.5px dashed var(--line-2);border-radius:9px;color:var(--brand);font-weight:600;font-size:13px}
-.add-sub:hover{background:var(--brand-tint);border-color:var(--brand)}
-.add-sub span{display:grid;justify-items:center;gap:6px}
-.add-sub svg.i{color:var(--brand);width:20px;height:20px}
-.none{padding:4px 20px 20px;color:var(--ink-3);font-size:13.5px}
 
-.items-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:0 20px 12px}
-.items-tools .search{flex:1 1 220px;max-width:340px}
-.filter-chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 6px 0 12px;border-radius:16px;background:var(--brand-tint);color:var(--brand);font-weight:600;font-size:13px}
-.filter-chip button{width:22px;height:22px;border-radius:50%;display:grid;place-items:center}
-.filter-chip button:hover{background:rgba(36,81,138,.15)}
-.filter-chip svg.i{color:var(--brand);width:14px;height:14px}
 .items{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-.item{display:grid;grid-template-columns:40px minmax(0,1fr) auto auto 32px;align-items:center;gap:14px;padding:11px 20px;border-bottom:1px solid var(--line)}
+.item{display:grid;grid-template-columns:52px minmax(0,1fr) 32px;align-items:center;gap:14px;padding:11px 20px;border-bottom:1px solid var(--line)}
 .item:last-child{border-bottom:0}
 .item:hover{background:var(--hover)}
-.cat{width:40px;height:40px;border-radius:9px;display:grid;place-items:center;background:var(--seg-track)}
-.cat svg.i{width:19px;height:19px;color:var(--ink-2)}
+.pic{width:52px;height:52px;border-radius:10px;overflow:hidden;display:grid;place-items:center;background:var(--hover);border:1px solid var(--line);flex:none}
+.pic img{width:100%;height:100%;object-fit:cover}
+.pic.add{position:relative;border:1.5px dashed var(--line-2)}
+.pic.add::before{content:"";position:absolute;inset:0;background:url(assets/logo-mark.png) center/auto 62% no-repeat;opacity:.13}
+.pic.add svg.i{position:relative;width:18px;height:18px;color:var(--brand)}
+.pic.add:hover{border-color:var(--brand);background:var(--brand-tint)}
+.photo-pick .pv.sq{width:72px;aspect-ratio:1}
 .it b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .it span{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden}
-.where{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:500;padding:3px 9px;border-radius:12px;background:var(--seg-track);color:var(--ink-2);white-space:nowrap}
-.where svg.i{width:13px;height:13px}
-.it-docs{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--ink-2);white-space:nowrap;min-width:64px}
-.it-docs svg.i{width:14px;height:14px}
-.wty{color:var(--green);font-weight:500}
-.wty.soon{color:var(--amber)}
 .items-foot{padding:10px 20px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
 
 .missing{max-width:440px;margin:60px auto;text-align:center}
@@ -80,9 +77,9 @@
 @media (max-width:720px){
   .hero{min-height:200px}.hero-in{padding:18px 16px}.hero h1{font-size:24px}
   .subs-grid{padding:4px 16px 16px;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  .items-tools{padding:0 16px 12px}
-  .item{grid-template-columns:40px minmax(0,1fr) 32px;padding:11px 16px}
-  .item .where,.item .it-docs{display:none}
+  .item{grid-template-columns:52px minmax(0,1fr) 32px;padding:11px 16px}
+  .panel-h{padding:14px 16px 12px}
+  .panel-h .search{flex:1 1 100%}
 }
 </style>
 </head>
@@ -93,10 +90,10 @@
     <nav class="nav" aria-label="Main">
       <a href="home-dashboard.html">Overview</a>
       <a href="spaces.html" aria-current="page">Spaces</a>
-      <a href="home-dashboard.html#documents">Documents</a>
-      <a href="home-dashboard.html#checklists">Checklists<span class="nav-n">4</span></a>
-      <a href="home-dashboard.html#activity">Recent activity</a>
-      <a href="home-dashboard.html#access">Property access</a>
+      <a href="documents.html">Documents</a>
+      <a href="checklists.html">Checklists<span class="nav-n">4</span></a>
+      <a href="activity.html">Activity</a>
+      <a href="access.html">Property access</a>
     </nav>
     <div class="top-r">
       <button class="bell" aria-label="Notifications (12 unread)"><svg class="i"><use href="#i-bell"/></svg><i></i></button>
@@ -112,8 +109,20 @@
 (function(){
   const {store, ico, esc, plural, thumb, menu, dialog, spaceDialog, deleteSpaceDialog, readPhoto, pickPhoto, toast, flashNext, CATS} = HRK;
   const $ = s => document.querySelector(s);
-  let id = decodeURIComponent(location.hash.slice(1)) || 'kitchen';
-  let activeSub = '', q = '';
+  /* Hash: #space or #space--subspace (opens the Sub-spaces tab with that sub-space active) */
+  const parseHash = () => { const [sp, sub] = decodeURIComponent(location.hash.slice(1)).split('--'); return {sp: sp || 'kitchen', sub: sub || ''}; };
+  let id = parseHash().sp;
+  let tab = parseHash().sub ? 'subs' : 'items', activeSub = parseHash().sub, q = '';
+
+  const kebabBtn = (attr, label) => `<button type="button" class="ib" ${attr} aria-haspopup="menu" aria-expanded="false" aria-label="Actions for ${esc(label)}">${ico('more')}</button>`;
+  function itemRows(list){
+    return list.map(i => `
+      <li class="item">
+        ${i.photo ? `<span class="pic"><img src="${esc(i.photo)}" alt="" loading="lazy"></span>` : `<button type="button" class="pic add" data-itemphoto="${i.id}" aria-label="Add a photo of ${esc(i.name)}">${ico('plus')}</button>`}
+        <span class="it"><b>${esc(i.name)}</b><span>${esc(i.model || CATS[i.cat] || '')}</span></span>
+        ${kebabBtn(`data-itemmenu="${i.id}"`, i.name)}
+      </li>`).join('');
+  }
 
   function render(){
     const s = store.get(id);
@@ -122,8 +131,10 @@
       $('#page').innerHTML = `<div class="missing"><h1>This space isn't here</h1><p>It may have been deleted or renamed.</p><a class="btn primary" href="spaces.html">${ico('left')}Back to spaces</a></div>`;
       return;
     }
+    if (activeSub && !s.subs.some(x => x.id === activeSub)) activeSub = '';
     document.title = `${s.name} · Spaces`;
-    const fl = store.floor(s.floor), docs = store.docs(s);
+    const fl = store.floor(s.floor);
+    const direct = s.items.filter(i => !i.sub);
     $('#page').innerHTML = `
       <nav class="crumbs" aria-label="Breadcrumb">
         <a href="home-dashboard.html">Vail Residence</a>${ico('right')}<a href="spaces.html">Spaces</a>${ico('right')}<a href="spaces.html#${fl.id}">${fl.name}</a>${ico('right')}<span aria-current="page">${esc(s.name)}</span>
@@ -134,9 +145,8 @@
             <h1>${esc(s.name)}</h1>
             <div class="meta">
               <span>${ico('layers')}${fl.name}</span>
-              <span>${ico('sub')}${plural(s.subs.length, 'subspace')}</span>
+              <span>${ico('sub')}${plural(s.subs.length, 'sub-space')}</span>
               <span>${ico('box')}${plural(s.items.length, 'item')}</span>
-              <span>${ico('file')}${plural(docs, 'document')}</span>
             </div>
           </div>
           <div class="hero-act">
@@ -147,31 +157,54 @@
         </div>
       </section>
 
-      <section class="card sec" aria-labelledby="h-subs">
-        <div class="card-h"><h2 id="h-subs">Subspaces <span>${s.subs.length}</span></h2>
-          <button type="button" class="btn green" id="addSub">${ico('plus')}Add subspace</button></div>
-        ${s.subs.length ? `<div class="subs-grid" id="subs">${s.subs.map(x => subCard(s, x)).join('')}</div>`
-          : `<p class="none">No subspaces yet. Split ${esc(s.name.toLowerCase())} into areas like a pantry or closet to find items faster.</p>`}
-      </section>
-
-      <section class="card sec" aria-labelledby="h-items">
-        <div class="card-h"><h2 id="h-items">Items <span id="itemCount"></span></h2>
-          <button type="button" class="btn primary" id="addItem">${ico('plus')}Add item</button></div>
-        <div class="items-tools">
-          <label class="search">${ico('search')}<input id="iq" type="search" placeholder="Search items" aria-label="Search items" value="${esc(q)}"></label>
-          <span id="chip"></span>
+      <div class="tabbar">
+        <div class="seg" role="tablist" id="tabs" aria-label="Space contents">
+          <button role="tab" type="button" id="tab-items" aria-controls="panel" data-tab="items" aria-selected="${tab === 'items'}">Items<span class="n">${direct.length}</span></button>
+          <button role="tab" type="button" id="tab-subs" aria-controls="panel" data-tab="subs" aria-selected="${tab === 'subs'}">Sub-spaces<span class="n">${s.subs.length}</span></button>
         </div>
-        <ul class="items" id="items"></ul>
-        <div class="items-foot" id="itemsFoot"></div>
-      </section>`;
-    drawItems();
+        ${tab === 'items'
+          ? `<button type="button" class="btn primary" id="addItem">${ico('plus')}Add item</button>`
+          : `<button type="button" class="btn green" id="addSub">${ico('plus')}Add sub-space</button>`}
+      </div>
+
+      <div id="panel" role="tabpanel" aria-labelledby="tab-${tab}">${tab === 'items' ? itemsPanel(s, direct) : subsPanel(s)}</div>`;
     wire(s);
   }
 
+  /* Items tab: only items linked directly to the space */
+  function itemsPanel(s, direct){
+    const ql = q.toLowerCase();
+    const list = direct.filter(i => !ql || i.name.toLowerCase().includes(ql) || (i.model || '').toLowerCase().includes(ql));
+    return `<section class="card" aria-label="Items in ${esc(s.name)}">
+      <div class="panel-h">
+        <div><h2>Items in ${esc(s.name)}</h2><p>Linked directly to this space. Items inside a sub-space are under Sub-spaces.</p></div>
+        ${direct.length ? `<label class="search">${ico('search')}<input id="iq" type="search" placeholder="Search items" aria-label="Search items" value="${esc(q)}"></label>` : ''}
+      </div>
+      <ul class="items" id="items">${list.length ? itemRows(list)
+        : `<li class="empty-state">${direct.length ? '<b>No items match</b>Try a different search.' : `<b>No items linked directly to ${esc(s.name)}</b>Add one here, or open Sub-spaces to see items in each area.`}</li>`}</ul>
+      ${direct.length ? `<div class="items-foot">${ql ? `Showing ${list.length} of ${plural(direct.length, 'item')}` : plural(direct.length, 'item')}</div>` : ''}
+    </section>`;
+  }
+
+  /* Sub-spaces tab: cards; the active one shows its items underneath (first one is active by default) */
+  function subsPanel(s){
+    if (!s.subs.length) return `<section class="card"><div class="empty-state"><b>No sub-spaces yet</b>Split ${esc(s.name.toLowerCase())} into areas like a pantry or closet to find items faster.</div></section>`;
+    if (!s.subs.some(x => x.id === activeSub)) activeSub = s.subs[0].id;
+    const sel = s.subs.find(x => x.id === activeSub);
+    const subItems = s.items.filter(i => i.sub === sel.id);
+    return `<section class="card" aria-label="Sub-spaces in ${esc(s.name)}">
+        <div class="panel-h"><h2>Sub-spaces in ${esc(s.name)}</h2></div>
+        <div class="subs-grid" id="subs">${s.subs.map(x => subCard(s, x)).join('')}</div>
+      </section>
+      <section class="card sub-items" id="subItems" aria-labelledby="h-subitems">
+        <div class="panel-h"><div><h2 id="h-subitems">Items in ${esc(sel.name)}</h2><p>${plural(subItems.length, 'item')}</p></div></div>
+        <ul class="items">${subItems.length ? itemRows(subItems) : `<li class="empty-state"><b>No items in ${esc(sel.name)} yet</b></li>`}</ul>
+      </section>`;
+  }
   function subCard(s, x){
     const n = s.items.filter(i => i.sub === x.id).length, on = activeSub === x.id;
     const kebab = `<button type="button" class="kebab" aria-haspopup="menu" aria-expanded="false" data-submenu="${x.id}" aria-label="Actions for ${esc(x.name)}">${ico('more')}</button>`;
-    const tick = `<span class="sel-tick">${ico('check')}Showing</span>`;
+    const tick = '';
     return `<div class="sub ${on ? 'on' : ''}">
       ${x.photo
         ? `<button type="button" class="sub-btn" data-sub="${x.id}" aria-pressed="${on}"><span class="thumb"><img src="${esc(x.photo)}" alt="" loading="lazy" style="object-position:${x.pos || '50% 50%'}">${tick}</span>
@@ -182,84 +215,99 @@
     </div>`;
   }
 
-  function drawItems(){
-    const s = store.get(id), ql = q.toLowerCase();
-    const list = s.items.filter(i => (!activeSub || i.sub === activeSub) && (!ql || i.name.toLowerCase().includes(ql) || (i.model || '').toLowerCase().includes(ql)));
-    const subName = sid => (s.subs.find(x => x.id === sid) || {}).name;
-    $('#itemCount').textContent = s.items.length;
-    $('#chip').innerHTML = activeSub ? `<span class="filter-chip">In ${esc(subName(activeSub))}<button type="button" id="clearSub" aria-label="Show all items">${ico('x')}</button></span>` : '';
-    $('#items').innerHTML = list.length ? list.map(i => `
-      <li class="item">
-        <span class="cat" title="${CATS[i.cat] || 'Item'}"><svg class="i" aria-hidden="true"><use href="#c-${i.cat || 'appliance'}"/></svg></span>
-        <span class="it"><b>${esc(i.name)}</b><span>${esc(i.model || CATS[i.cat] || '')}${i.warranty ? ` · <span class="wty ${/ends/i.test(i.warranty) ? 'soon' : ''}">Warranty ${esc(i.warranty.replace(/^Through/,'through').replace(/^Ends/,'ends'))}</span>` : ''}</span></span>
-        <span class="where">${i.sub ? ico('sub') + esc(subName(i.sub)) : ico('layers') + 'Whole ' + esc(s.name.toLowerCase())}</span>
-        <span class="it-docs">${ico('file')}${plural(i.docs || 0, 'doc')}</span>
-        <button type="button" class="ib" data-itemmenu="${i.id}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for ${esc(i.name)}">${ico('more')}</button>
-      </li>`).join('')
-      : `<li class="empty-state">${s.items.length ? `<b>No items match</b>${activeSub ? 'Nothing has been added to this subspace yet.' : 'Try a different search.'}` : `<b>No items yet</b>Add the appliances, fixtures and systems in this space.`}</li>`;
-    $('#itemsFoot').textContent = activeSub || ql ? `Showing ${list.length} of ${plural(s.items.length, 'item')}` : `${plural(s.items.length, 'item')} · ${plural(store.docs(s), 'document')}`;
-  }
-
   function subDialog(s, x){
     dialog({
-      title: x ? `Rename ${esc(x.name)}` : `Add subspace to ${esc(s.name)}`, ok: x ? 'Save' : 'Add subspace', size:'sm',
-      body: `<div class="field"><label for="subName">Subspace name<span class="req">*</span></label>
+      title: x ? `Rename ${esc(x.name)}` : `Add sub-space to ${esc(s.name)}`, ok: x ? 'Save' : 'Add sub-space', size:'sm',
+      body: `<div class="field"><label for="subName">Sub-space name<span class="req">*</span></label>
         <div class="ctl"><input id="subName" maxlength="40" value="${x ? esc(x.name) : ''}" placeholder="e.g. Pantry"></div>
         <span class="msg" hidden>Enter a name.</span></div>`,
       onOk(bg){
         const v = bg.querySelector('#subName').value.trim(), f = bg.querySelector('.field');
         f.classList.toggle('err', !v); f.querySelector('.msg').hidden = !!v;
         if (!v) return false;
-        if (x){ store.updateSub(s.id, x.id, {name:v}); toast('Subspace renamed'); }
-        else { store.addSub(s.id, {name:v}); toast(`${v} added`); }
+        if (x){ store.updateSub(s.id, x.id, {name:v}); toast('Sub-space renamed'); }
+        else { activeSub = store.addSub(s.id, {name:v}); tab = 'subs'; toast(`${v} added`); }
         render();
       }
     });
   }
 
-  function itemDialog(s){
-    const subOpts = `<option value="">Whole ${esc(s.name.toLowerCase())}</option>` + s.subs.map(x => `<option value="${x.id}" ${x.id === activeSub ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
-    const catOpts = Object.entries(CATS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+  function itemDialog(s, preset, item){
+    const cur = item ? item.sub : preset;
+    let photo = item ? item.photo || null : null;
+    const subOpts = `<option value="">${esc(s.name)} (not in a sub-space)</option>` + s.subs.map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
+    const catOpts = Object.entries(CATS).map(([k, v]) => `<option value="${k}" ${item && item.cat === k ? 'selected' : ''}>${v}</option>`).join('');
+    const where = cur ? (s.subs.find(x => x.id === cur) || {}).name : s.name;
     dialog({
-      title: `Add item to ${esc(s.name)}`, ok: 'Add item',
+      title: item ? `Edit ${esc(item.name)}` : `Add item to ${esc(where)}`, ok: item ? 'Save changes' : 'Add item',
       body: `<div class="field"><label for="itName">Item name<span class="req">*</span></label>
-          <div class="ctl"><input id="itName" maxlength="60" placeholder="e.g. Dishwasher"></div><span class="msg" hidden>Enter a name.</span></div>
-        <div class="field"><label for="itModel">Brand or model</label><div class="ctl"><input id="itModel" maxlength="60" placeholder="Optional"></div></div>
-        <div class="field"><label for="itSub">Where in ${esc(s.name.toLowerCase())}</label><div class="ctl sel"><select id="itSub">${subOpts}</select></div></div>
-        <div class="field"><label for="itCat">Type</label><div class="ctl sel"><select id="itCat">${catOpts}</select></div></div>`,
+          <div class="ctl"><input id="itName" maxlength="60" placeholder="e.g. Dishwasher" value="${item ? esc(item.name) : ''}"></div><span class="msg" hidden>Enter a name.</span></div>
+        <div class="field"><label for="itModel">Brand or model</label><div class="ctl"><input id="itModel" maxlength="60" placeholder="Optional" value="${item ? esc(item.model || '') : ''}"></div></div>
+        <div class="field"><label for="itSub">Linked to</label><div class="ctl sel"><select id="itSub">${subOpts}</select></div></div>
+        <div class="field"><label for="itCat">Type</label><div class="ctl sel"><select id="itCat">${catOpts}</select></div></div>
+        <div class="field"><span class="lab">Photo</span>
+          <div class="photo-pick"><span class="pv sq" id="itPv"></span>
+            <span class="acts"><button type="button" class="btn" id="itPick">${ico('upload')}<span>Upload</span></button><button type="button" class="btn" id="itDrop">${ico('trash')}Remove</button></span></div></div>`,
+      onOpen(bg){
+        const draw = () => {
+          bg.querySelector('#itPv').innerHTML = photo ? `<img src="${esc(photo)}" alt="">` : ico('image');
+          bg.querySelector('#itPick span').textContent = photo ? 'Replace' : 'Upload';
+          bg.querySelector('#itDrop').hidden = !photo;
+        };
+        draw();
+        bg.querySelector('#itPick').onclick = async () => { const f = await pickPhoto(); if (!f) return; try { photo = await readPhoto(f, 600); draw(); } catch(err){ toast(err.message); } };
+        bg.querySelector('#itDrop').onclick = () => { photo = null; draw(); };
+      },
       onOk(bg){
         const v = bg.querySelector('#itName').value.trim(), f = bg.querySelector('.field');
         f.classList.toggle('err', !v); f.querySelector('.msg').hidden = !!v;
         if (!v) return false;
-        store.addItem(s.id, {name:v, model:bg.querySelector('#itModel').value.trim(), sub:bg.querySelector('#itSub').value, cat:bg.querySelector('#itCat').value});
-        toast(`${v} added`); render();
+        const sub = bg.querySelector('#itSub').value;
+        const data = {name:v, model:bg.querySelector('#itModel').value.trim(), sub, cat:bg.querySelector('#itCat').value, photo};
+        if (item) store.updateItem(s.id, item.id, data); else store.addItem(s.id, data);
+        if (sub){ tab = 'subs'; activeSub = sub; } else { tab = 'items'; }
+        toast(item ? `${v} updated` : `${v} added to ${sub ? s.subs.find(x => x.id === sub).name : s.name}`); render();
       }
     });
   }
 
+  /* Item menu: options are shown for the design; actions are not wired up */
+  function itemMenu(s, k){
+    menu(k, [
+      {icon:'edit', label:'Edit item', run: () => {}},
+      '-',
+      {icon:'trash', label:'Delete item', danger:true, run: () => {}}
+    ]);
+  }
   function wire(s){
     $('#editSpace').onclick = () => spaceDialog({space:s, onSaved: render});
     $('#delSpace').onclick = () => deleteSpaceDialog(s, () => { flashNext(`${s.name} deleted`); location.href = 'spaces.html'; });
     const hp = $('#heroPhoto');
     if (hp) hp.onclick = async () => { const f = await pickPhoto(); if (!f) return; try { store.updateSpace(s.id, {photo: await readPhoto(f)}); render(); toast('Cover photo added'); } catch(err){ toast(err.message); } };
-    $('#addSub').onclick = () => subDialog(s);
-    $('#addItem').onclick = () => itemDialog(s);
-    $('#iq').addEventListener('input', e => { q = e.target.value; drawItems(); });
-    const subs = $('#subs');
-    if (subs) subs.addEventListener('click', async e => {
+    $('#tabs').onclick = e => { const b = e.target.closest('[data-tab]'); if (!b || b.dataset.tab === tab) return; tab = b.dataset.tab; render(); $('#tab-' + tab).focus(); };
+    $('#tabs').onkeydown = e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft'){ e.preventDefault(); tab = tab === 'items' ? 'subs' : 'items'; render(); $('#tab-' + tab).focus(); } };
+    const ai = $('#addItem'); if (ai) ai.onclick = () => itemDialog(s, '');
+    const as = $('#addSub'); if (as) as.onclick = () => subDialog(s);
+    const iq = $('#iq'); if (iq) iq.addEventListener('input', e => {
+      q = e.target.value; const pos = e.target.selectionStart; render();
+      const n = $('#iq'); n.focus(); n.setSelectionRange(pos, pos);
+    });
+    $('#panel').addEventListener('click', async e => {
+      const im = e.target.closest('[data-itemmenu]'); if (im) return itemMenu(s, im);
+      const ip = e.target.closest('[data-itemphoto]');
+      if (ip){ const f = await pickPhoto(); if (!f) return; try { const it = s.items.find(i => i.id === ip.dataset.itemphoto); store.updateItem(s.id, it.id, {photo: await readPhoto(f, 600)}); render(); toast(`Photo added to ${it.name}`); } catch(err){ toast(err.message); } return; }
       const k = e.target.closest('[data-submenu]');
       if (k){
         e.stopPropagation();
         const x = s.subs.find(y => y.id === k.dataset.submenu);
         return menu(k, [
-          {icon:'eye', label:'Show its items', run: () => { activeSub = x.id; render(); $('#h-items').scrollIntoView({behavior:'smooth', block:'start'}); }},
           {icon:'edit', label:'Rename', run: () => subDialog(s, x)},
           {icon:'upload', label: x.photo ? 'Replace photo' : 'Add photo', run: async () => { const f = await pickPhoto(); if (!f) return; try { store.updateSub(s.id, x.id, {photo: await readPhoto(f), pos:''}); render(); toast(`Photo added to ${x.name}`); } catch(err){ toast(err.message); } }},
           '-',
-          {icon:'trash', label:'Delete subspace', danger:true, run: () => {
+          {icon:'trash', label:'Delete sub-space', danger:true, run: () => {
             const n = s.items.filter(i => i.sub === x.id).length;
-            dialog({title:`Delete ${esc(x.name)}?`, ok:'Delete subspace', danger:true, size:'sm',
-              body:`<p><b>${esc(x.name)}</b> will be removed from ${esc(s.name)}.${n ? ` Its ${plural(n, 'item')} stay in ${esc(s.name)}.` : ''}</p>`,
+            dialog({title:`Delete ${esc(x.name)}?`, ok:'Delete sub-space', danger:true, size:'sm',
+              body:`<p><b>${esc(x.name)}</b> will be removed from ${esc(s.name)}.${n ? ` Its ${plural(n, 'item')} move to the Items tab of ${esc(s.name)}.` : ''}</p>`,
               onOk(){ store.deleteSub(s.id, x.id); if (activeSub === x.id) activeSub = ''; render(); toast(`${x.name} deleted`); }});
           }}
         ]);
@@ -271,25 +319,15 @@
         return;
       }
       const b = e.target.closest('[data-sub]');
-      if (b){ activeSub = activeSub === b.dataset.sub ? '' : b.dataset.sub; render(); }
-    });
-    $('#items').addEventListener('click', e => {
-      const k = e.target.closest('[data-itemmenu]'); if (!k) return;
-      const it = s.items.find(i => i.id === k.dataset.itemmenu);
-      menu(k, [
-        {icon:'file', label:'View documents', run: () => toast(`${plural(it.docs || 0, 'document')} for ${it.name}`)},
-        '-',
-        {icon:'trash', label:'Delete item', danger:true, run: () => dialog({title:`Delete ${esc(it.name)}?`, ok:'Delete item', danger:true, size:'sm',
-          body:`<p><b>${esc(it.name)}</b> will be removed from ${esc(s.name)}.${it.docs ? ` Its ${plural(it.docs, 'document')} stay in Documents.` : ''}</p>`,
-          onOk(){ store.deleteItem(s.id, it.id); render(); toast(`${it.name} deleted`); }})}
-      ]);
+      if (b){
+        activeSub = b.dataset.sub; render();
+        const si = $('#subItems'); if (si) si.scrollIntoView({behavior:'smooth', block:'nearest'});
+      }
     });
   }
 
-  $('#page').addEventListener('click', e => { if (e.target.closest('#clearSub')){ activeSub = ''; render(); } });
-  window.addEventListener('hashchange', () => { id = decodeURIComponent(location.hash.slice(1)); activeSub = ''; q = ''; render(); scrollTo(0, 0); });
-  render();
-})();
+  window.addEventListener('hashchange', () => { const h = parseHash(); id = h.sp; tab = h.sub ? 'subs' : 'items'; activeSub = h.sub; q = ''; render(); scrollTo(0, 0); });
+  render();})();
 </script>
 </body>
 </html>
