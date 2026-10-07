@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Edit Property</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: same top bar as Overview; form on the left, a live preview of the Overview card pinned on the right. */
+:root{
+  --bg:#F4F5F7; --surface:#FFFFFF; --hover:#F7F8FA; --line:#E3E5E8; --line-2:#D0D4DA;
+  --ink:#1B2430; --ink-2:#555F6D; --ink-3:#8A929D;
+  --brand:#24518A; --brand-ink:#FFFFFF; --brand-tint:#EBF0F7;
+  --icon:#42BA6F; --fresh:#F2F8F4; --green:#3B7F55; --amber:#9A5B0C; --red:#B23A30; --red-tint:#FBECEA;
+  --f:"Public Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121518;--surface:#1A1E23;--hover:#20252B;--line:#2A3037;--line-2:#3A424B;
+  --ink:#E6E9ED;--ink-2:#A3ABB5;--ink-3:#757E89;--brand:#86ABDD;--brand-ink:#121518;--brand-tint:#1F2A38;
+  --fresh:#18241D;--green:#78BE92;--amber:#DDA458;--red:#E57F76;--red-tint:#3A1F1C;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121518;--surface:#1A1E23;--hover:#20252B;--line:#2A3037;--line-2:#3A424B;
+  --ink:#E6E9ED;--ink-2:#A3ABB5;--ink-3:#757E89;--brand:#86ABDD;--brand-ink:#121518;--brand-tint:#1F2A38;
+  --fresh:#18241D;--green:#78BE92;--amber:#DDA458;--red:#E57F76;--red-tint:#3A1F1C;color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 var(--f);margin:0;font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer;padding:0}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+svg.i{width:16px;height:16px;flex:none;color:var(--ink-3);stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* Top bar (same as Overview) */
+.top{background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{max-width:1240px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;gap:24px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px;letter-spacing:-.015em;white-space:nowrap}
+.logo img{height:36px;width:auto}
+.nav{display:flex;align-items:stretch;gap:4px;height:100%;margin-left:12px;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{display:flex;align-items:center;gap:6px;padding:0 10px;color:var(--ink-2);font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;border-top:2px solid transparent}
+.nav a:hover{color:var(--ink)}
+.nav a[aria-current="page"]{color:var(--ink);font-weight:600;border-bottom-color:var(--brand)}
+.nav-n{font-size:11px;font-weight:600;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--brand-tint);color:var(--brand);display:inline-grid;place-items:center}
+.top-r{margin-left:auto;display:flex;align-items:center;gap:6px}
+.bell{position:relative;width:36px;height:36px;border-radius:6px;display:grid;place-items:center}
+.bell svg.i{color:var(--ink-2);width:18px;height:18px}
+.bell:hover{background:var(--hover)}
+.bell i{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 0 2px var(--surface)}
+.av{width:32px;height:32px;border-radius:50%;background:var(--line) url(assets/avatar-brady.png) center/112%;flex:none}
+@media (max-width:1100px){
+  .top-in{flex-wrap:wrap;height:auto;row-gap:0;padding-top:10px}
+  .nav{order:3;flex-basis:100%;height:44px;margin:6px 0 0 -10px;border-top:1px solid var(--line)}
+}
+
+/* Page */
+.page{max-width:1240px;margin:0 auto;padding-inline:24px;padding-block:22px 120px}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--ink-2);font-weight:500;font-size:13.5px;margin-bottom:12px}
+.back:hover{color:var(--ink)}
+.back svg.i{color:currentColor}
+.title{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.title h1{margin:0;font-size:26px;line-height:1.2;font-weight:600;letter-spacing:-.02em}
+.title p{margin:4px 0 0;color:var(--ink-3)}
+
+.layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px;align-items:start}
+.form{display:grid;gap:18px;min-width:0}
+
+/* Section cards */
+.sec{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-width:0}
+.sec-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 20px 0}
+.sec-h h2{margin:0;font-size:15px;font-weight:600}
+.sec-h p{margin:2px 0 0;font-size:13px;color:var(--ink-3)}
+.sec-b{padding:16px 20px 20px;display:grid;gap:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px}
+
+/* Fields */
+.field{display:grid;gap:6px;min-width:0}
+.field label,.field .lab{font-size:13px;font-weight:600;color:var(--ink)}
+.req{color:var(--red);margin-left:2px}
+.ctl{position:relative;display:flex;align-items:center}
+.ctl input,.ctl select{width:100%;height:40px;padding:0 12px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--ink);font-size:14px;transition:border-color .15s,box-shadow .15s}
+.ctl input::placeholder{color:var(--ink-3)}
+.ctl input:hover,.ctl select:hover{border-color:var(--ink-3)}
+.ctl input:focus,.ctl select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint)}
+.ctl .lead{position:absolute;left:12px;pointer-events:none}
+.ctl.has-lead input{padding-left:36px}
+.ctl .suffix{position:absolute;right:12px;font-size:13px;color:var(--ink-3);pointer-events:none}
+.ctl.has-suffix input{padding-right:52px}
+.ctl select{appearance:none;-webkit-appearance:none;padding-right:38px;cursor:pointer}
+.ctl.sel::after{content:"";position:absolute;right:12px;width:16px;height:16px;background:var(--ink-3);pointer-events:none;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center/contain no-repeat}
+.ctl .eye{position:absolute;right:6px;width:30px;height:30px;border-radius:6px;display:grid;place-items:center}
+.ctl .eye:hover{background:var(--hover)}
+.ctl.has-eye input{padding-right:42px}
+.field.err input,.field.err select{border-color:var(--red)}
+.field.err input:focus{box-shadow:0 0 0 3px var(--red-tint)}
+.msg{font-size:12.5px;color:var(--red)}
+.help{font-size:12.5px;color:var(--ink-3)}
+
+/* Stepper for counts */
+.step{display:flex;align-items:center;height:40px;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;background:var(--surface)}
+.step:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint)}
+.step button{width:40px;height:100%;display:grid;place-items:center}
+.step button:hover{background:var(--hover)}
+.step button svg.i{color:var(--ink-2)}
+.step input{flex:1;min-width:0;height:100%;border:0;border-inline:1px solid var(--line);text-align:center;background:transparent;font-weight:600;appearance:textfield;-moz-appearance:textfield}
+.step input::-webkit-inner-spin-button,.step input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.step input:focus{outline:none}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;border-radius:8px;font-size:13.5px;font-weight:500;border:1px solid var(--line-2);background:var(--surface);white-space:nowrap}
+.btn:hover{background:var(--hover)}
+.btn svg.i{color:currentColor}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.primary svg.i{color:var(--brand-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.ghost:hover{background:var(--hover)}
+.btn.danger{color:var(--red)}
+.btn.danger:hover{background:var(--red-tint);border-color:transparent}
+.link-btn{display:inline-flex;align-items:center;gap:5px;color:var(--brand);font-weight:600;font-size:13px;padding:4px 6px;border-radius:6px}
+.link-btn:hover{background:var(--brand-tint)}
+.link-btn svg.i{color:var(--brand)}
+
+/* Cover photo */
+.cover{position:relative;aspect-ratio:16/6;max-width:100%;border-radius:10px;overflow:hidden;background:var(--hover);border:1px solid var(--line)}
+.cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cover.empty{border:1.5px dashed var(--line-2);display:grid;place-items:center}
+.cover.empty::before{content:"";position:absolute;inset:0;background:url(assets/logo-mark.png) center/auto 62% no-repeat;opacity:.12}
+.cover.over{border-color:var(--icon);background:var(--fresh)}
+.cover-empty{position:relative;display:grid;justify-items:center;gap:8px;text-align:center;color:var(--ink-2);font-size:13px}
+.cover-empty .plus{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line-2);box-shadow:0 2px 6px rgba(20,32,46,.08)}
+.cover-empty .plus svg.i{color:var(--brand);width:20px;height:20px}
+.cover-empty b{color:var(--brand)}
+.cover-tools{position:absolute;right:10px;bottom:10px;display:flex;gap:6px}
+.cover-tools .btn{height:32px;background:rgba(20,32,46,.55);border-color:rgba(255,255,255,.25);color:#fff;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.cover-tools .btn:hover{background:rgba(20,32,46,.72)}
+.cover-tools .btn svg.i{color:#fff}
+
+/* Floors */
+.floors{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.floor{display:flex;align-items:center;gap:10px;height:46px;padding:0 8px 0 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.floor:hover{border-color:var(--line-2)}
+.floor .nm{flex:1;min-width:0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.floor .ct{font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+.floor input{flex:1;min-width:0;height:32px;border:1px solid var(--brand);border-radius:6px;padding:0 8px;box-shadow:0 0 0 3px var(--brand-tint);outline:none;background:var(--surface)}
+.ib{width:30px;height:30px;border-radius:6px;display:grid;place-items:center}
+.ib:hover{background:var(--hover)}
+.ib:hover svg.i{color:var(--ink)}
+.ib.del:hover{background:var(--red-tint)}
+.ib.del:hover svg.i{color:var(--red)}
+.ib.ok svg.i{color:var(--green)}
+
+/* Notes editor */
+.editor{border:1px solid var(--line-2);border-radius:8px;overflow:hidden;background:var(--surface)}
+.editor:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint)}
+.tb{display:flex;align-items:center;gap:2px;padding:6px;border-bottom:1px solid var(--line);background:var(--hover)}
+.tb button{width:32px;height:30px;border-radius:6px;display:grid;place-items:center;font-size:14px;color:var(--ink-2)}
+.tb button:hover,.tb button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,32,46,.08)}
+.tb .sep{width:1px;height:18px;background:var(--line-2);margin:0 4px}
+.tb svg.i{color:currentColor}
+.ed{min-height:150px;max-height:280px;overflow:auto;padding:12px 14px;line-height:1.6;outline:none}
+.ed p{margin:0 0 6px}
+.ed ul,.ed ol{margin:0 0 6px;padding-left:22px}
+.ed:empty::before{content:attr(data-ph);color:var(--ink-3)}
+.ed-foot{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--ink-3)}
+.ed-foot .over{color:var(--red);font-weight:600}
+
+/* Preview */
+.pv{position:sticky;top:20px;display:grid;gap:14px;min-width:0}
+.pv-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pv-h h2{margin:0;font-size:13px;font-weight:600;color:var(--ink-2);display:flex;align-items:center;gap:8px}
+.pv-sub{font-size:12px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin:4px 0 -4px}
+
+/* Overview card, same treatment as the dashboard */
+.prop{--hero:#1A3D69;--hero-ink:#EEF3F9;--hero-ink-2:#C3D2E4;--hero-rule:rgba(255,255,255,.16);
+  background-color:var(--hero);background-repeat:no-repeat;background-size:cover;background-position:65% 45%;
+  color:var(--hero-ink);border-radius:10px;overflow:hidden;position:relative;transition:background-position .2s}
+.prop::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,rgba(20,46,80,.92) 0%,rgba(20,46,80,.8) 34%,rgba(20,46,80,.38) 62%,rgba(20,46,80,.08) 100%),
+             linear-gradient(0deg,rgba(14,32,58,.88) 0%,rgba(14,32,58,.6) 40%,rgba(14,32,58,0) 75%)}
+.prop h3,.prop .where,.facts dd,.facts dt{text-shadow:0 1px 8px rgba(8,20,38,.55)}
+.prop-in{position:relative;z-index:1;padding:20px 18px 0}
+.prop-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.prop h3{font-size:20px;font-weight:700;margin:0 0 3px;letter-spacing:-.015em;word-break:break-word}
+.prop .where{color:var(--hero-ink-2);font-size:13px}
+.prop .pbtn{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 12px;border-radius:7px;font-size:13px;font-weight:600;color:#fff;background:rgba(12,26,46,.62);border:0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.prop .pbtn img{width:17px;height:17px}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:18px 0 0;border-top:1px solid var(--hero-rule)}
+.facts div{padding:10px 12px 12px 0;min-width:0}
+.facts div:not(:nth-child(3n+1)){padding-left:12px;border-left:1px solid var(--hero-rule)}
+.facts div:nth-child(n+4){border-top:1px solid var(--hero-rule)}
+.facts dt{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--hero-ink-2);margin-bottom:3px}
+.facts dt svg.i{width:13px;height:13px;color:var(--hero-ink-2)}
+.facts dd{margin:0;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pnote{position:relative;z-index:1;padding:10px 18px;background:rgba(0,0,0,.2);color:var(--hero-ink-2);font-size:12.5px;display:flex;gap:6px;min-width:0}
+.pnote b{color:var(--hero-ink);flex:none}
+.pnote span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flash{animation:flash .6s ease}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(66,186,111,.0)}30%{box-shadow:0 0 0 4px rgba(66,186,111,.45)}100%{box-shadow:0 0 0 0 rgba(66,186,111,0)}}
+
+/* Switcher preview */
+.swp{display:flex;align-items:center;gap:12px;padding:8px 12px 8px 8px;border:1px solid var(--line);background:var(--surface);border-radius:12px;box-shadow:0 1px 2px rgba(20,32,46,.05)}
+.swp .ico{width:40px;height:40px;border-radius:9px;background:var(--brand);overflow:hidden;flex:none;display:grid;place-items:center}
+.swp .ico img{width:100%;height:100%;object-fit:cover}
+.swp .ico svg.i{color:#fff;width:20px;height:20px}
+.swp .t{flex:1;min-width:0}
+.swp b{display:block;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.swp span{display:block;color:var(--ink-3);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Save bar */
+.savebar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(20,32,46,.06);padding-bottom:env(safe-area-inset-bottom,0px);transform:translateY(0);transition:transform .25s}
+.savebar-in{max-width:1240px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:10px}
+.savebar .note{flex:1;font-size:13px;color:var(--ink-3)}
+
+/* Dialog + toast */
+.dlg-bg{position:fixed;inset:0;z-index:50;background:rgba(15,22,30,.45);display:grid;place-items:center;padding:16px}
+.dlg{width:min(420px,100%);background:var(--surface);border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+.dlg h3{margin:0;padding:18px 20px 6px;font-size:17px;font-weight:600}
+.dlg p{margin:0;padding:0 20px;color:var(--ink-2);line-height:1.55}
+.dlg-f{display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid var(--line);margin-top:16px}
+.btn.red{background:var(--red);border-color:var(--red);color:#fff}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:8px;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.2);max-width:calc(100vw - 32px);display:flex;align-items:center;gap:8px}
+.toast svg.i{color:var(--icon)}
+
+@media (max-width:1000px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .pv{position:static;order:-1}
+}
+@media (max-width:640px){
+  .top-in{padding:10px 16px 0;gap:14px}
+  .logo span{display:none}
+  .page{padding-inline:16px}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .sec-h,.sec-b{padding-left:16px;padding-right:16px}
+  .savebar-in{padding:10px 16px}
+  .savebar .note{display:none}
+  .cover{aspect-ratio:16/8}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="m14.5 7.5 3 3"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5M14 11v5"/></symbol>
+  <symbol id="i-house" viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v11h13V9"/><path d="M10 20v-5.5h4V20"/></symbol>
+  <symbol id="i-ruler" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></symbol>
+  <symbol id="i-bed" viewBox="0 0 24 24"><path d="M3 19V6M3 15h18v4M21 15v-3a3 3 0 0 0-3-3h-7v6"/><circle cx="7" cy="11.5" r="1.8"/></symbol>
+  <symbol id="i-bath" viewBox="0 0 24 24"><path d="M3 12h18v2a6 6 0 0 1-6 6H9a6 6 0 0 1-6-6z"/><path d="M6 12V6a2.5 2.5 0 0 1 4.6-1.4M7 20l-1 1.5M17 20l1 1.5"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5z"/><path d="m3 12.5 9 5 9-5M3 17l9 5 9-5"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M4 4l16 16M9.9 5.8A9.8 9.8 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-3 3.8M6.2 7.5A17 17 0 0 0 2.5 12S6 18.5 12 18.5a9.6 9.6 0 0 0 4-.9"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r=".8"/><circle cx="4.5" cy="12" r=".8"/><circle cx="4.5" cy="18" r=".8"/></symbol>
+  <symbol id="i-olist" viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10M4 5h1.5v4M4 9h3M4 14.5a1.5 1.5 0 0 1 3 .5c0 1-3 2-3 3.5h3"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="top-in">
+    <a class="logo" href="home-dashboard.html"><img src="assets/logo-mark.png" alt="" width="150" height="130"><span>Home Record Keeper</span></a>
+    <nav class="nav" aria-label="Main">
+      <a href="home-dashboard.html">Overview</a>
+      <a href="spaces.html">Spaces</a>
+      <a href="home-dashboard.html#documents">Documents</a>
+      <a href="home-dashboard.html#checklists">Checklists<span class="nav-n">4</span></a>
+      <a href="home-dashboard.html#activity">Recent activity</a>
+      <a href="home-dashboard.html#access">Property access</a>
+    </nav>
+    <div class="top-r">
+      <button class="bell" aria-label="Notifications (12 unread)"><svg class="i"><use href="#i-bell"/></svg><i></i></button>
+      <span class="av" role="img" aria-label="Brady Ricci"></span>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <a class="back" href="home-dashboard.html" id="backLink"><svg class="i"><use href="#i-left"/></svg>Back to overview</a>
+  <div class="title">
+    <div>
+      <h1>Edit property</h1>
+      <p id="titleSub">Vail Residence · 123 Alpine Drive, Vail, CO 81657</p>
+    </div>
+  </div>
+
+  <div class="layout">
+    <form class="form" id="form" novalidate>
+
+      <!-- Cover photo -->
+      <section class="sec" aria-labelledby="h-cover">
+        <div class="sec-h"><div><h2 id="h-cover">Cover photo</h2><p>Shown behind the property details on Overview and in the property switcher.</p></div></div>
+        <div class="sec-b">
+          <div class="cover" id="cover">
+            <img id="coverImg" src="assets/property-cover.jpg" alt="Cover photo of the property">
+            <div class="cover-tools" id="coverTools">
+              <button type="button" class="btn" id="coverReplace"><svg class="i"><use href="#i-upload"/></svg>Replace</button>
+              <button type="button" class="btn" id="coverRemove"><svg class="i"><use href="#i-trash"/></svg>Remove</button>
+            </div>
+            <div class="cover-empty" id="coverEmpty" hidden>
+              <span class="plus"><svg class="i"><use href="#i-plus"/></svg></span>
+              <span><b>Upload a cover photo</b> or drag one here</span>
+              <span class="help">Landscape works best, at least 1600 × 600 px. JPG or PNG.</span>
+            </div>
+          </div>
+          <input type="file" id="coverInput" accept="image/*" hidden>
+        </div>
+      </section>
+
+      <!-- The property -->
+      <section class="sec" aria-labelledby="h-prop">
+        <div class="sec-h"><div><h2 id="h-prop">The property</h2><p>The basics that appear on the Overview card.</p></div></div>
+        <div class="sec-b">
+          <div class="field" data-req>
+            <label for="name">Property name<span class="req">*</span></label>
+            <div class="ctl"><input id="name" value="Vail Residence" autocomplete="off" maxlength="60"></div>
+            <span class="msg" hidden>Enter a name for the property.</span>
+          </div>
+          <div class="grid2">
+            <div class="field" data-req>
+              <label for="type">Property type<span class="req">*</span></label>
+              <div class="ctl sel"><select id="type">
+                <option>House</option><option selected>Bungalow</option><option>Cabin</option><option>Condo</option>
+                <option>Townhouse</option><option>Apartment</option><option>Duplex</option>
+              </select></div>
+            </div>
+            <div class="field">
+              <label for="sqft">Square footage</label>
+              <div class="ctl has-suffix"><input id="sqft" inputmode="numeric" value="4,184"><span class="suffix">sq ft</span></div>
+            </div>
+          </div>
+          <div class="grid3">
+            <div class="field">
+              <label for="built">Year built</label>
+              <div class="ctl"><input id="built" inputmode="numeric" maxlength="4" value="1998"></div>
+            </div>
+            <div class="field">
+              <span class="lab" id="l-beds">Bedrooms</span>
+              <div class="step" data-step>
+                <button type="button" data-d="-1" aria-label="Fewer bedrooms"><svg class="i"><use href="#i-minus"/></svg></button>
+                <input id="beds" type="number" min="0" max="50" step="1" value="4" aria-labelledby="l-beds">
+                <button type="button" data-d="1" aria-label="More bedrooms"><svg class="i"><use href="#i-plus"/></svg></button>
+              </div>
+            </div>
+            <div class="field">
+              <span class="lab" id="l-baths">Bathrooms</span>
+              <div class="step" data-step>
+                <button type="button" data-d="-0.5" aria-label="Fewer bathrooms"><svg class="i"><use href="#i-minus"/></svg></button>
+                <input id="baths" type="number" min="0" max="50" step="0.5" value="2" aria-labelledby="l-baths">
+                <button type="button" data-d="0.5" aria-label="More bathrooms"><svg class="i"><use href="#i-plus"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Floors -->
+      <section class="sec" aria-labelledby="h-floors">
+        <div class="sec-h">
+          <div><h2 id="h-floors">Floors</h2><p>Spaces are grouped by these floors.</p></div>
+          <button type="button" class="link-btn" id="addFloor"><svg class="i"><use href="#i-plus"/></svg>Add floor</button>
+        </div>
+        <div class="sec-b"><ul class="floors" id="floors"></ul></div>
+      </section>
+
+      <!-- Matterport -->
+      <section class="sec" aria-labelledby="h-mp">
+        <div class="sec-h"><div><h2 id="h-mp">Matterport</h2><p>Adds a “Matterport tour” button to the Overview card.</p></div></div>
+        <div class="sec-b grid2">
+          <div class="field">
+            <label for="mpLink">Tour link</label>
+            <div class="ctl has-lead"><svg class="i lead"><use href="#i-link"/></svg><input id="mpLink" type="url" placeholder="https://my.matterport.com/show/?m=…" value="https://my.matterport.com/show/?m=Vq1mcok6pNW"></div>
+            <span class="msg" hidden>Use a link that starts with https://my.matterport.com</span>
+          </div>
+          <div class="field">
+            <label for="mpPass">Tour password</label>
+            <div class="ctl has-lead has-eye"><svg class="i lead"><use href="#i-lock"/></svg><input id="mpPass" type="password" placeholder="Optional" autocomplete="new-password"><button type="button" class="eye" id="eye" aria-label="Show password"><svg class="i"><use href="#i-eye"/></svg></button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notes -->
+      <section class="sec" aria-labelledby="h-notes">
+        <div class="sec-h"><div><h2 id="h-notes">Notes</h2><p>Access codes, contacts and anything the next person should know.</p></div></div>
+        <div class="sec-b">
+          <div class="editor">
+            <div class="tb" role="toolbar" aria-label="Formatting">
+              <button type="button" data-cmd="bold" aria-label="Bold" aria-pressed="false"><b>B</b></button>
+              <button type="button" data-cmd="italic" aria-label="Italic" aria-pressed="false"><i style="font-family:Georgia,serif">I</i></button>
+              <button type="button" data-cmd="underline" aria-label="Underline" aria-pressed="false"><u>U</u></button>
+              <span class="sep"></span>
+              <button type="button" data-cmd="insertUnorderedList" aria-label="Bulleted list" aria-pressed="false"><svg class="i"><use href="#i-list"/></svg></button>
+              <button type="button" data-cmd="insertOrderedList" aria-label="Numbered list" aria-pressed="false"><svg class="i"><use href="#i-olist"/></svg></button>
+            </div>
+            <div class="ed" id="notes" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="h-notes" data-ph="Add notes about this property"><p>Main water shutoff is in the mechanical room behind the furnace (red handle).</p><p>Gate code changes every January; Mike at Alpine Property Services has the current one.</p><ul><li>Snow removal contract renews Oct 31</li><li>Plow stakes go along the north edge of the drive before the first storm</li></ul></div>
+          </div>
+          <div class="ed-foot"><span id="count">0 / 2000</span><span>Shown on Overview under the property details</span></div>
+        </div>
+      </section>
+
+      <!-- Address -->
+      <section class="sec" aria-labelledby="h-addr">
+        <div class="sec-h"><div><h2 id="h-addr">Address</h2></div></div>
+        <div class="sec-b">
+          <div class="field" data-req>
+            <label for="street">Street address<span class="req">*</span></label>
+            <div class="ctl has-lead"><svg class="i lead"><use href="#i-pin"/></svg><input id="street" value="123 Alpine Drive" autocomplete="street-address"></div>
+            <span class="msg" hidden>Enter the street address.</span>
+          </div>
+          <div class="grid3">
+            <div class="field" data-req>
+              <label for="city">City<span class="req">*</span></label>
+              <div class="ctl"><input id="city" value="Vail" autocomplete="address-level2"></div>
+              <span class="msg" hidden>Enter a city.</span>
+            </div>
+            <div class="field">
+              <label for="state">State</label>
+              <div class="ctl"><input id="state" value="CO" maxlength="20" autocomplete="address-level1"></div>
+            </div>
+            <div class="field">
+              <label for="zip">ZIP code</label>
+              <div class="ctl"><input id="zip" value="81657" inputmode="numeric" maxlength="10" autocomplete="postal-code"></div>
+            </div>
+          </div>
+          <div class="field" data-req>
+            <label for="country">Country<span class="req">*</span></label>
+            <div class="ctl sel"><select id="country" autocomplete="country-name"><option selected>United States</option><option>Canada</option><option>Mexico</option><option>United Kingdom</option></select></div>
+          </div>
+        </div>
+      </section>
+    </form>
+
+    <!-- Live preview -->
+    <aside class="pv" aria-label="Preview">
+      <div class="pv-h"><h2>Preview</h2></div>
+      <div class="pv-sub">Overview card</div>
+      <div class="prop" id="pvCard">
+        <div class="prop-in">
+          <div class="prop-top">
+            <div style="min-width:0">
+              <h3 id="pvName">Vail Residence</h3>
+              <div class="where" id="pvAddr">123 Alpine Drive, Vail, CO 81657</div>
+            </div>
+            <span class="pbtn" id="pvMp"><img src="assets/matterport-white.png" alt="">Matterport tour</span>
+          </div>
+          <dl class="facts">
+            <div><dt><svg class="i"><use href="#i-house"/></svg>Type</dt><dd id="pvType">Bungalow</dd></div>
+            <div><dt><svg class="i"><use href="#i-ruler"/></svg>Size</dt><dd id="pvSize">4,184 sq ft</dd></div>
+            <div><dt><svg class="i"><use href="#i-bed"/></svg>Bedrooms</dt><dd id="pvBeds">4</dd></div>
+            <div><dt><svg class="i"><use href="#i-bath"/></svg>Bathrooms</dt><dd id="pvBaths">2</dd></div>
+            <div><dt><svg class="i"><use href="#i-layers"/></svg>Floors</dt><dd id="pvFloors">4</dd></div>
+            <div><dt><svg class="i"><use href="#i-cal"/></svg>Built</dt><dd id="pvBuilt">1998</dd></div>
+          </dl>
+        </div>
+        <div class="pnote" id="pvNote"><b>Notes</b><span></span></div>
+      </div>
+      <div class="pv-sub">Property switcher</div>
+      <div class="swp">
+        <span class="ico" id="pvThumb"><img src="assets/property-cover.jpg" alt=""></span>
+        <span class="t"><b id="pvSwName">Vail Residence</b><span id="pvSwAddr">123 Alpine Drive, Vail, CO 81657</span></span>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<div class="savebar">
+  <div class="savebar-in">
+    <span class="note" id="saveNote">No changes yet</span>
+    <button type="button" class="btn ghost" id="cancel">Cancel</button>
+    <button type="button" class="btn primary" id="save" disabled><svg class="i"><use href="#i-check"/></svg>Save changes</button>
+  </div>
+</div>
+
+<div class="dlg-bg" id="leaveDlg" hidden>
+  <div class="dlg" role="alertdialog" aria-modal="true" aria-labelledby="leaveT" aria-describedby="leaveP">
+    <h3 id="leaveT">Discard your changes?</h3>
+    <p id="leaveP">You have edits that haven't been saved. If you leave now they'll be lost.</p>
+    <div class="dlg-f">
+      <button type="button" class="btn" id="stay">Keep editing</button>
+      <button type="button" class="btn red" id="discard">Discard changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="dlg-bg" id="floorDlg" hidden>
+  <div class="dlg" role="alertdialog" aria-modal="true" aria-labelledby="floorT" aria-describedby="floorP">
+    <h3 id="floorT">Remove floor?</h3>
+    <p id="floorP"></p>
+    <div class="dlg-f">
+      <button type="button" class="btn" id="floorKeep">Cancel</button>
+      <button type="button" class="btn red" id="floorDel">Remove floor</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden><svg class="i"><use href="#i-check"/></svg><span></span></div>
+
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+  const ico = id => `<svg class="i"><use href="#i-${id}"/></svg>`;
+  const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+
+  /* ---------- State ---------- */
+  let floors = [
+    {name:'Main floor', spaces:6}, {name:'Upper floor', spaces:4},
+    {name:'Basement', spaces:2}, {name:'Outside', spaces:2}
+  ];
+  let cover = {src:'assets/property-cover.jpg', pos:65};
+  let dirty = false, editing = -1;
+
+  /* ---------- Dirty tracking ---------- */
+  function markDirty(){
+    if (!dirty){ dirty = true; }
+    $('#saveNote').textContent = 'You have unsaved changes';
+    $('#save').disabled = false;
+  }
+  function markClean(){
+    dirty = false;
+    $('#saveNote').textContent = 'No changes yet';
+    $('#save').disabled = true;
+  }
+
+  /* ---------- Preview ---------- */
+  const fmtNum = v => { const n = parseInt(String(v).replace(/[^\d]/g, ''), 10); return isNaN(n) ? '' : n.toLocaleString('en-US'); };
+  const fmtBaths = v => { const n = parseFloat(v); if (isNaN(n)) return '—'; return Number.isInteger(n) ? String(n) : Math.floor(n) + '½'; };
+  function addressLine(){
+    const st = $('#street').value.trim(), city = $('#city').value.trim(), state = $('#state').value.trim(), zip = $('#zip').value.trim();
+    const tail = [state, zip].filter(Boolean).join(' ');
+    return [st, city, tail].filter(Boolean).join(', ') || 'Add an address';
+  }
+  function notesText(){ return $('#notes').innerText.replace(/\s+/g, ' ').trim(); }
+  function render(){
+    const name = $('#name').value.trim() || 'Untitled property';
+    const addr = addressLine();
+    $('#pvName').textContent = name; $('#pvSwName').textContent = name;
+    $('#pvAddr').textContent = addr; $('#pvSwAddr').textContent = addr;
+    $('#titleSub').textContent = `${name} · ${addr}`;
+    $('#pvType').textContent = $('#type').value;
+    const sq = fmtNum($('#sqft').value);
+    $('#pvSize').textContent = sq ? sq + ' sq ft' : '—';
+    $('#pvBeds').textContent = $('#beds').value || '0';
+    $('#pvBaths').textContent = fmtBaths($('#baths').value);
+    $('#pvBuilt').textContent = $('#built').value.trim() || '—';
+    $('#pvFloors').textContent = floors.length;
+    $('#pvMp').hidden = !$('#mpLink').value.trim();
+    const nt = notesText();
+    $('#pvNote').hidden = !nt;
+    $('#pvNote span').textContent = nt;
+    const card = $('#pvCard');
+    card.style.backgroundImage = cover.src ? `url("${cover.src}")` : 'none';
+    card.style.backgroundPosition = `${cover.pos}% 45%`;
+    $('#pvThumb').innerHTML = cover.src ? `<img src="${cover.src}" alt="" style="object-position:${cover.pos}% 40%">` : ico('house');
+    const len = nt.length, c = $('#count');
+    c.textContent = `${len.toLocaleString()} / 2,000`;
+    c.classList.toggle('over', len > 2000);
+  }
+  let flashT;
+  function flash(){ const c = $('#pvCard'); c.classList.remove('flash'); void c.offsetWidth; c.classList.add('flash'); clearTimeout(flashT); flashT = setTimeout(() => c.classList.remove('flash'), 700); }
+  function changed(){ markDirty(); render(); flash(); }
+
+  /* ---------- Inputs ---------- */
+  $('#form').addEventListener('input', e => {
+    if (e.target.id === 'sqft'){ const p = e.target.selectionStart, before = e.target.value.length; e.target.value = fmtNum(e.target.value); const d = e.target.value.length - before; e.target.setSelectionRange(p + d, p + d); }
+    if (e.target.id === 'built' || e.target.id === 'zip') e.target.value = e.target.value.replace(/[^\d-]/g, '');
+    const f = e.target.closest('.field'); if (f && f.classList.contains('err')) validateField(f);
+    changed();
+  });
+  $('#form').addEventListener('change', e => { if (e.target.tagName === 'SELECT') changed(); });
+
+  /* Steppers */
+  document.querySelectorAll('[data-step]').forEach(s => s.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const inp = s.querySelector('input'), step = parseFloat(b.dataset.d);
+    const v = Math.min(+inp.max, Math.max(+inp.min, (parseFloat(inp.value) || 0) + step));
+    inp.value = v; changed();
+  }));
+
+  /* ---------- Cover photo ---------- */
+  const coverBox = $('#cover');
+  function drawCover(){
+    const has = !!cover.src;
+    coverBox.classList.toggle('empty', !has);
+    $('#coverImg').hidden = !has; $('#coverTools').hidden = !has; $('#coverEmpty').hidden = has;
+    if (has){ $('#coverImg').src = cover.src; $('#coverImg').style.objectPosition = `${cover.pos}% 45%`; }
+  }
+  function takeFile(file){
+    if (!file || !file.type.startsWith('image/')) return toast('Choose an image file, such as JPG or PNG');
+    cover.src = URL.createObjectURL(file);
+    drawCover(); changed(); toast('Cover photo updated');
+  }
+  $('#coverReplace').onclick = () => $('#coverInput').click();
+  coverBox.addEventListener('click', e => { if (!cover.src && !e.target.closest('.cover-tools')) $('#coverInput').click(); });
+  $('#coverInput').onchange = e => takeFile(e.target.files[0]);
+  $('#coverRemove').onclick = () => { cover.src = ''; drawCover(); changed(); };
+  ['dragenter','dragover'].forEach(t => coverBox.addEventListener(t, e => { e.preventDefault(); coverBox.classList.add('over'); }));
+  ['dragleave','drop'].forEach(t => coverBox.addEventListener(t, e => { e.preventDefault(); coverBox.classList.remove('over'); }));
+  coverBox.addEventListener('drop', e => takeFile(e.dataTransfer.files[0]));
+
+  /* ---------- Floors ---------- */
+  function drawFloors(){
+    $('#floors').innerHTML = floors.map((f, i) => i === editing ? `
+      <li class="floor">${ico('layers')}
+        <input id="floorEdit" value="${f.name.replace(/"/g,'&quot;')}" aria-label="Floor name" maxlength="40">
+        <button type="button" class="ib ok" data-a="ok" data-i="${i}" aria-label="Save floor name">${ico('check')}</button>
+        <button type="button" class="ib" data-a="cancel" data-i="${i}" aria-label="Cancel">${ico('x')}</button>
+      </li>` : `
+      <li class="floor">${ico('layers')}
+        <span class="nm">${f.name}</span><span class="ct">${f.spaces ? plural(f.spaces, 'space') : 'No spaces yet'}</span>
+        <button type="button" class="ib" data-a="edit" data-i="${i}" aria-label="Rename ${f.name}">${ico('edit')}</button>
+        <button type="button" class="ib del" data-a="del" data-i="${i}" aria-label="Remove ${f.name}">${ico('trash')}</button>
+      </li>`).join('');
+    const ed = $('#floorEdit'); if (ed){ ed.focus(); ed.select(); }
+  }
+  function commitFloor(i){
+    const v = $('#floorEdit').value.trim();
+    if (!v){ floors[i].isNew ? floors.splice(i, 1) : 0; }
+    else if (v !== floors[i].name || floors[i].isNew){ floors[i].name = v; delete floors[i].isNew; changed(); }
+    editing = -1; drawFloors(); render();
+  }
+  function cancelFloor(i){ if (floors[i].isNew) floors.splice(i, 1); editing = -1; drawFloors(); }
+  let delIdx = -1;
+  $('#floors').addEventListener('click', e => {
+    const b = e.target.closest('[data-a]'); if (!b) return;
+    const i = +b.dataset.i, a = b.dataset.a;
+    if (a === 'edit'){ if (editing > -1) cancelFloor(editing); editing = i; drawFloors(); }
+    if (a === 'ok') commitFloor(i);
+    if (a === 'cancel') cancelFloor(i);
+    if (a === 'del'){
+      delIdx = i; const f = floors[i];
+      $('#floorT').textContent = `Remove ${f.name}?`;
+      $('#floorP').textContent = f.spaces ? `${plural(f.spaces, 'space')} on this floor will move to “Unassigned”. Their items and documents stay.` : 'This floor has no spaces.';
+      $('#floorDlg').hidden = false; $('#floorDel').focus();
+    }
+  });
+  $('#floors').addEventListener('keydown', e => {
+    if (e.target.id !== 'floorEdit') return;
+    if (e.key === 'Enter'){ e.preventDefault(); commitFloor(editing); }
+    if (e.key === 'Escape'){ e.preventDefault(); cancelFloor(editing); }
+  });
+  $('#addFloor').onclick = () => { if (editing > -1) cancelFloor(editing); floors.push({name:'', spaces:0, isNew:true}); editing = floors.length - 1; drawFloors(); };
+  $('#floorKeep').onclick = () => { $('#floorDlg').hidden = true; };
+  $('#floorDel').onclick = () => { const n = floors[delIdx].name; floors.splice(delIdx, 1); $('#floorDlg').hidden = true; drawFloors(); changed(); toast(`${n} removed`); };
+
+  /* ---------- Matterport ---------- */
+  $('#eye').onclick = () => {
+    const p = $('#mpPass'), show = p.type === 'password';
+    p.type = show ? 'text' : 'password';
+    $('#eye').setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    $('#eye').innerHTML = ico(show ? 'eye-off' : 'eye');
+  };
+
+  /* ---------- Notes editor ---------- */
+  const ed = $('#notes');
+  document.querySelectorAll('.tb [data-cmd]').forEach(b => {
+    b.addEventListener('mousedown', e => e.preventDefault());
+    b.addEventListener('click', () => { ed.focus(); document.execCommand(b.dataset.cmd); syncTb(); changed(); });
+  });
+  function syncTb(){ document.querySelectorAll('.tb [data-cmd]').forEach(b => { let on = false; try { on = document.queryCommandState(b.dataset.cmd); } catch(_){} b.setAttribute('aria-pressed', on); }); }
+  ed.addEventListener('input', changed);
+  document.addEventListener('selectionchange', () => { if (document.activeElement === ed) syncTb(); });
+
+  /* ---------- Validation + save ---------- */
+  function validateField(f){
+    const inp = f.querySelector('input,select'); const ok = !!inp.value.trim();
+    f.classList.toggle('err', !ok); const m = f.querySelector('.msg'); if (m) m.hidden = ok;
+    return ok;
+  }
+  function validate(){
+    let first = null;
+    document.querySelectorAll('.field[data-req]').forEach(f => { if (!validateField(f) && !first) first = f; });
+    const mp = $('#mpLink').value.trim(), mpF = $('#mpLink').closest('.field');
+    const mpOk = !mp || /^https:\/\/(my\.)?matterport\.com\//i.test(mp);
+    mpF.classList.toggle('err', !mpOk); mpF.querySelector('.msg').hidden = mpOk;
+    if (!mpOk && !first) first = mpF;
+    if (notesText().length > 2000 && !first) first = $('#notes').closest('.sec');
+    return first;
+  }
+  $('#save').onclick = () => {
+    const bad = validate();
+    if (bad){ bad.scrollIntoView({behavior:'smooth', block:'center'}); const i = bad.querySelector('input,select,[contenteditable]'); i && i.focus({preventScroll:true}); toast('Fix the highlighted fields to save'); return; }
+    markClean(); toast('Property details saved');
+  };
+
+  /* ---------- Leaving ---------- */
+  let leaveTo = 'home-dashboard.html';
+  function tryLeave(href, e){
+    if (!dirty) return;
+    e.preventDefault(); leaveTo = href; $('#leaveDlg').hidden = false; $('#stay').focus();
+  }
+  $('#cancel').onclick = e => { if (dirty) tryLeave('home-dashboard.html', e); else location.href = 'home-dashboard.html'; };
+  document.querySelectorAll('a[href*=".html"]').forEach(a => a.addEventListener('click', e => tryLeave(a.getAttribute('href'), e)));
+  $('#stay').onclick = () => { $('#leaveDlg').hidden = true; };
+  $('#discard').onclick = () => { dirty = false; location.href = leaveTo; };
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (!$('#leaveDlg').hidden) $('#leaveDlg').hidden = true;
+    if (!$('#floorDlg').hidden) $('#floorDlg').hidden = true;
+  });
+  [$('#leaveDlg'), $('#floorDlg')].forEach(d => d.addEventListener('click', e => { if (e.target === d) d.hidden = true; }));
+
+  /* ---------- Toast ---------- */
+  function toast(msg){ const t = $('#toast'); t.querySelector('span').textContent = msg; t.hidden = false; clearTimeout(t._h); t._h = setTimeout(() => t.hidden = true, 3000); }
+
+  drawCover(); drawFloors(); render(); markClean();
+})();
+</script>
+</body>
+</html>

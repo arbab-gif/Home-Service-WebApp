@@ -1,0 +1,9 @@
+{
+  "name": "home-record-keeper-webapp",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Home Record Keeper web app prototype",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

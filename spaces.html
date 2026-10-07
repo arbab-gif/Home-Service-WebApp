@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spaces</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/base.css">
+<style>
+/* Layout: toolbar (floor tabs, search, add), then floor-grouped grids of space cards. */
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+.toolbar{justify-content:space-between}
+.head-acts{display:flex;gap:8px;flex-wrap:wrap}
+.field.err select{border-color:var(--red)}
+.toolbar .search{flex:0 1 340px;margin-left:auto}
+@media (max-width:640px){.toolbar .search{flex:1 1 100%}}
+.group{margin-bottom:36px}
+.group-h{display:flex;align-items:center;gap:12px;margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.group-ico{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;background:var(--brand-tint);flex:none}
+.group-ico svg.i{color:var(--brand);width:18px;height:18px}
+.group-h h2{margin:0;font-size:18px;line-height:1.2;font-weight:600;letter-spacing:-.01em}
+.group-h p{margin:2px 0 0;font-size:13px;color:var(--ink-3)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+.space{position:relative;display:grid;gap:10px;min-width:0}
+.space .thumb{transition:border-color .15s,box-shadow .15s}
+.space a.cover:hover .thumb{box-shadow:0 6px 18px rgba(20,32,46,.12)}
+.space a.cover:hover .thumb img{transform:scale(1.04)}
+.space>.kebab{position:absolute;top:8px;right:8px}
+.space:hover>.kebab{opacity:1}
+.s-txt{display:grid;gap:3px;padding:0 2px;min-width:0}
+.s-txt a{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-txt a:hover{text-decoration:underline;text-underline-offset:3px}
+.counts{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--ink-3)}
+.counts span{display:inline-flex;align-items:center;gap:4px}
+.counts svg.i{width:13px;height:13px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="logo" href="home-dashboard.html"><img src="assets/logo-mark.png" alt="" width="150" height="130"><span>Home Record Keeper</span></a>
+    <nav class="nav" aria-label="Main">
+      <a href="home-dashboard.html">Overview</a>
+      <a href="spaces.html" aria-current="page">Spaces</a>
+      <a href="home-dashboard.html#documents">Documents</a>
+      <a href="home-dashboard.html#checklists">Checklists<span class="nav-n">4</span></a>
+      <a href="home-dashboard.html#activity">Recent activity</a>
+      <a href="home-dashboard.html#access">Property access</a>
+    </nav>
+    <div class="top-r">
+      <button class="bell" aria-label="Notifications (12 unread)"><svg class="i"><use href="#i-bell"/></svg><i></i></button>
+      <span class="av" role="img" aria-label="Brady Ricci"></span>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="home-dashboard.html">Vail Residence</a><svg class="i"><use href="#i-right"/></svg><span aria-current="page">Spaces</span></nav>
+  <div class="page-h">
+    <div>
+      <h1>Spaces</h1>
+      <p id="summary"></p>
+    </div>
+    <div class="head-acts">
+      <button class="btn green" id="addSubspace" type="button"><svg class="i"><use href="#i-plus"/></svg>Add subspace</button>
+      <button class="btn primary" id="addSpace" type="button"><svg class="i"><use href="#i-plus"/></svg>Add space</button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="seg" role="tablist" id="floors" aria-label="Filter by floor"></div>
+    <label class="search"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><input id="q" type="search" placeholder="Search spaces, subspaces or items" aria-label="Search spaces"></label>
+  </div>
+
+  <div id="list"></div>
+</main>
+
+<script src="assets/hrk.js"></script>
+<script>
+(function(){
+  const {store, ico, esc, plural, thumb, menu, dialog, spaceDialog, deleteSpaceDialog, readPhoto, pickPhoto, toast} = HRK;
+  const $ = s => document.querySelector(s);
+  let floor = 'all';
+  try { const h = location.hash.slice(1); if (store.floors.some(f => f.id === h)) floor = h; } catch(_){}
+
+  function drawTabs(){
+    const all = store.all();
+    $('#floors').innerHTML = [{id:'all', short:'All floors'}, ...store.floors].map(f => {
+      return `<button role="tab" type="button" data-f="${f.id}" aria-selected="${f.id === floor}">${f.short}</button>`;
+    }).join('');
+  }
+  function card(s){
+    const items = s.items.length;
+    const kebab = `<button type="button" class="kebab" aria-haspopup="menu" aria-expanded="false" data-menu="${s.id}" aria-label="Actions for ${esc(s.name)}">${ico('more')}</button>`;
+    return `<article class="space">
+      ${s.photo ? `<a class="cover" href="space.html#${s.id}" aria-label="Open ${esc(s.name)}">${thumb({photo:s.photo, pos:s.pos, tag: ''})}</a>`
+                : thumb({photo:null, tag: '', label:s.name, addAttr:`data-photo="${s.id}"`})}
+      ${kebab}
+      <div class="s-txt">
+        <a href="space.html#${s.id}">${esc(s.name)}</a>
+        <span class="counts">
+          <span>${ico('sub')}${plural(s.subs.length, 'subspace')}</span>
+          <span>${ico('box')}${plural(items, 'item')}</span>
+        </span>
+      </div>
+    </article>`;
+  }
+  function draw(){
+    drawTabs();
+    const q = $('#q').value.trim().toLowerCase();
+    const match = s => !q || s.name.toLowerCase().includes(q) || s.subs.some(x => x.name.toLowerCase().includes(q)) || s.items.some(i => i.name.toLowerCase().includes(q));
+    const all = store.all();
+    $('#summary').textContent = `${plural(all.length, 'space')} · ${plural(all.reduce((a, s) => a + s.subs.length, 0), 'subspace')} · ${plural(all.reduce((a, s) => a + s.items.length, 0), 'item')} across ${plural(store.floors.length, 'floor')}`;
+    const floors = floor === 'all' ? store.floors : store.floors.filter(f => f.id === floor);
+    let html = '', shown = 0;
+    floors.forEach(f => {
+      const list = all.filter(s => s.floor === f.id && match(s));
+      shown += list.length;
+      if (!list.length && (q || floor === 'all')) return;
+      if (!list.length){ html += `<div class="empty-state"><b>No spaces on ${f.name.toLowerCase()} yet</b>Use Add space to create one.</div>`; return; }
+      html += `<section class="group" aria-labelledby="g-${f.id}">
+        <header class="group-h"><span class="group-ico">${ico('layers')}</span><div><h2 id="g-${f.id}">${f.name}</h2><p>${plural(list.length, 'space')} · ${plural(list.reduce((a, s) => a + s.items.length, 0), 'item')}</p></div></header>
+        <div class="grid">${list.map(card).join('')}
+        </div></section>`;
+    });
+    $('#list').innerHTML = shown || !q ? html : `<div class="empty-state"><b>No spaces match “${esc(q)}”</b>Try a room, subspace or item name.</div>`;
+  }
+
+  $('#floors').addEventListener('click', e => {
+    const b = e.target.closest('[data-f]'); if (!b) return;
+    floor = b.dataset.f; history.replaceState(null, '', floor === 'all' ? location.pathname : '#' + floor); draw();
+  });
+  $('#q').addEventListener('input', draw);
+  /* Add subspace from the list: pick the parent space, name it, optional photo */
+  function subspaceDialog(){
+    const groups = store.floors.map(f => {
+      const sp = store.all().filter(s => s.floor === f.id);
+      return sp.length ? `<optgroup label="${f.name}">${sp.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}</optgroup>` : '';
+    }).join('');
+    let photo = null;
+    dialog({
+      title: 'Add subspace', ok: 'Add subspace',
+      body: `
+        <div class="field"><label for="ssParent">Space<span class="req">*</span></label>
+          <div class="ctl sel"><select id="ssParent"><option value="">Choose a space</option>${groups}</select></div>
+          <span class="msg" hidden>Choose which space this belongs to.</span></div>
+        <div class="field"><label for="ssName">Subspace name<span class="req">*</span></label>
+          <div class="ctl"><input id="ssName" maxlength="40" placeholder="e.g. Pantry, Walk-in closet"></div>
+          <span class="msg" hidden>Enter a name.</span></div>
+        <div class="field"><span class="lab">Photo</span>
+          <div class="photo-pick"><span class="pv" id="ssPv">${ico('image')}</span>
+            <span class="acts"><button type="button" class="btn" id="ssPick">${ico('upload')}<span>Upload</span></button><button type="button" class="btn" id="ssDrop" hidden>${ico('trash')}Remove</button></span></div>
+          <span class="help">Optional. You can add one later from the space.</span></div>`,
+      onOpen(bg){
+        const draw = () => {
+          bg.querySelector('#ssPv').innerHTML = photo ? `<img src="${photo}" alt="">` : ico('image');
+          bg.querySelector('#ssPick span').textContent = photo ? 'Replace' : 'Upload';
+          bg.querySelector('#ssDrop').hidden = !photo;
+        };
+        bg.querySelector('#ssPick').onclick = async () => { const f = await pickPhoto(); if (!f) return; try { photo = await readPhoto(f); draw(); } catch(err){ toast(err.message); } };
+        bg.querySelector('#ssDrop').onclick = () => { photo = null; draw(); };
+      },
+      onOk(bg){
+        const pid = bg.querySelector('#ssParent').value, name = bg.querySelector('#ssName').value.trim();
+        const fp = bg.querySelector('#ssParent').closest('.field'), fn = bg.querySelector('#ssName').closest('.field');
+        fp.classList.toggle('err', !pid); fp.querySelector('.msg').hidden = !!pid;
+        fn.classList.toggle('err', !name); fn.querySelector('.msg').hidden = !!name;
+        if (!pid || !name){ (pid ? bg.querySelector('#ssName') : bg.querySelector('#ssParent')).focus(); return false; }
+        store.addSub(pid, {name, photo});
+        draw(); toast(`${name} added to ${store.get(pid).name}`);
+      }
+    });
+  }
+  $('#addSubspace').onclick = subspaceDialog;  $('#addSpace').onclick = () => spaceDialog({floor: floor === 'all' ? 'main' : floor, onSaved: draw});
+
+  $('#list').addEventListener('click', async e => {
+    const ph = e.target.closest('[data-photo]');
+    if (ph){
+      const f = await pickPhoto(); if (!f) return;
+      try { store.updateSpace(ph.dataset.photo, {photo: await readPhoto(f)}); draw(); toast(`Photo added to ${store.get(ph.dataset.photo).name}`); } catch(err){ toast(err.message); }
+      return;
+    }
+    const k = e.target.closest('[data-menu]');
+    if (k){
+      e.preventDefault(); e.stopPropagation();
+      const s = store.get(k.dataset.menu);
+      menu(k, [
+        {icon:'eye', label:'View space', run: () => location.href = `space.html#${s.id}`},
+        {icon:'edit', label:'Edit space', run: () => spaceDialog({space:s, onSaved: draw})},
+        '-',
+        {icon:'trash', label:'Delete space', danger:true, run: () => deleteSpaceDialog(s, () => { draw(); toast(`${s.name} deleted`); })}
+      ]);
+    }
+  });
+  draw();
+})();
+</script>
+</body>
+</html>
