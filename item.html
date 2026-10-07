@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Item</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/base.css">
+<style>
+/* Layout: photo gallery on the left, item summary on the right, then a tabbed card (Info · Docs · Contacts · Service history). */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:28px;margin-bottom:24px;align-items:start}
+.gal{display:grid;gap:10px;min-width:0;position:sticky;top:76px}
+.gal-main{position:relative;aspect-ratio:4/3;border-radius:14px;overflow:hidden;background:var(--hover);border:1px solid var(--line)}
+.gal-main img{width:100%;height:100%;object-fit:cover;display:block}
+.gal-main.none{display:grid;place-items:center}
+.gal-main.none::before{content:"";position:absolute;inset:0;background:url(assets/logo-mark.png) center/auto 34% no-repeat;opacity:.12}
+.gal-empty{position:relative;display:grid;justify-items:center;gap:8px;text-align:center;color:var(--ink-3)}
+.gal-empty b{color:var(--ink)}
+.cam{position:absolute;left:16px;bottom:16px;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--brand);box-shadow:0 6px 18px rgba(20,32,46,.25);transition:transform .15s}
+.cam:hover{transform:scale(1.05)}
+.cam svg.i{width:22px;height:22px;color:#fff}
+.cam input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.count{position:absolute;right:16px;bottom:16px;padding:5px 12px;border-radius:999px;background:rgba(15,22,30,.62);color:#fff;font-size:13px;font-weight:600}
+.nav-btn{position:absolute;top:50%;margin-top:-20px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.9);box-shadow:0 2px 8px rgba(20,32,46,.18);opacity:0;transition:opacity .15s}
+.gal-main:hover .nav-btn,.nav-btn:focus-visible{opacity:1}
+.nav-btn.prev{left:14px}.nav-btn.next{right:14px}
+.nav-btn svg.i{width:18px;height:18px;color:var(--ink)}
+.thumbs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.thumbs button{position:relative;flex:none;width:64px;height:64px;border-radius:10px;overflow:hidden;border:2px solid transparent;opacity:.7;transition:opacity .15s,border-color .15s}
+.thumbs button:hover{opacity:1}
+.thumbs button[aria-current="true"]{border-color:var(--brand);opacity:1}
+.thumbs img{width:100%;height:100%;object-fit:cover;display:block}
+
+.sum{display:grid;gap:18px;min-width:0;padding-top:4px}
+.sum-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.sum h1{margin:0;font-size:28px;line-height:1.2;font-weight:600;letter-spacing:-.02em}
+.sum .model{margin:4px 0 0;color:var(--ink-3)}
+.sum-act{display:flex;gap:4px;flex:none}
+.sum-act .ib{width:38px;height:38px;border:1px solid var(--line);background:var(--surface);border-radius:9px}
+.facts{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.fact{padding:14px 16px;border-bottom:1px solid var(--line);min-width:0}
+.fact.rl{border-right:1px solid var(--line)}
+.fact:nth-last-child(-n+2){border-bottom:0}
+.fact small{display:block;font-size:12px;color:var(--ink-3);margin-bottom:5px}
+.fact b{display:block;font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fact b.muted{color:var(--ink-3);font-weight:400}
+.path{display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.path a{color:var(--ink);font-weight:500}
+.path a:hover{color:var(--brand);text-decoration:underline}
+.path svg.i{width:14px;height:14px;color:var(--ink-3)}
+
+.tabs-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tabbar{display:flex;gap:4px;padding:0 12px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tabbar button{position:relative;height:50px;padding:0 14px;font-weight:500;color:var(--ink-2);white-space:nowrap;display:inline-flex;align-items:center;gap:7px}
+.tabbar button:hover{color:var(--ink)}
+.tabbar button .n{font-size:11.5px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;display:inline-grid;place-items:center;background:var(--hover);color:var(--ink-3);font-weight:600}
+.tabbar button[aria-selected="true"]{color:var(--ink);font-weight:600}
+.tabbar button[aria-selected="true"]::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2px;border-radius:2px;background:var(--brand)}
+.tabbar button[aria-selected="true"] .n{background:var(--brand-tint);color:var(--brand)}
+.panel{padding:20px 20px 24px}
+.panel-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.panel-h h2{margin:0;font-size:16px;font-weight:600}
+.panel-h p{margin:2px 0 0;font-size:13px;color:var(--ink-3)}
+
+/* Info */
+.info{display:grid;gap:20px;max-width:760px}
+.desc{white-space:pre-line;line-height:1.6;color:var(--ink)}
+.desc.muted{color:var(--ink-3)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ctl input[type=date]{cursor:pointer}
+.ctl textarea{width:100%;min-height:96px;padding:10px 12px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;resize:vertical}
+.ctl textarea:hover{border-color:var(--ink-3)}
+.ctl textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint)}
+.info input,.info textarea{font:inherit;font-size:14px}
+.info-f{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding-top:16px;border-top:1px solid var(--line)}
+.info-f .hint{margin-right:auto;font-size:12.5px;color:var(--ink-3)}
+.info-f .hint.on{color:var(--amber, #B7791F);font-weight:500}
+
+/* Docs */
+.folders{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+.folder{display:grid;justify-items:center;gap:10px;padding:24px 12px 20px;border:1px solid var(--line);border-radius:14px;background:var(--hover);text-align:center;transition:border-color .15s,box-shadow .15s,transform .15s}
+.folder:hover{border-color:var(--line-2);box-shadow:0 6px 16px rgba(20,32,46,.08);transform:translateY(-1px)}
+.folder svg.i{width:46px;height:46px;color:var(--brand);fill:var(--brand)}
+.folder b{font-weight:600;font-size:15px}
+.folder small{padding:3px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:12.5px;color:var(--ink-3)}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--ink-2);font-weight:500}
+.back:hover{color:var(--brand)}
+.doclist{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.doclist li{display:grid;grid-template-columns:40px minmax(0,1fr) auto 32px;gap:12px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--line)}
+.doclist li:last-child{border-bottom:0}
+.doclist li:hover{background:var(--hover)}
+.doclist .nm b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doclist .nm small,.doclist time{font-size:12.5px;color:var(--ink-3)}
+
+/* Dropbox-style folder tiles (same as Documents) */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:22px 18px}
+.tile-btn{display:grid;gap:10px;text-align:left;min-width:0;border-radius:10px}
+.tile-btn .box{position:relative;aspect-ratio:1/1;border-radius:10px;background:var(--hover);border:1px solid var(--line);display:grid;place-items:center;transition:background .15s,border-color .15s}
+.tile-btn:hover .box{background:var(--brand-tint);border-color:var(--line-2)}
+.tile-btn:focus-visible .box{outline:2px solid var(--brand);outline-offset:2px}
+.svc-tiles .meta b{white-space:normal;line-height:1.3}
+.folder-art{width:46%;height:auto}
+.folder-art .back{fill:#8FB2EE}
+.folder-art .front{fill:#A9C6F7}
+.meta{display:flex;align-items:flex-start;gap:9px;min-width:0;padding:0 2px}
+.meta .mini{width:22px;height:18px;flex:none;margin-top:2px}
+.meta .txt{min-width:0}
+.meta b{display:block;font-weight:500;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta small{display:block;font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fold-title{display:flex;align-items:center;gap:14px;margin:14px 0 16px}
+.fold-ico{width:48px;height:48px;border-radius:12px;background:var(--brand-tint);display:grid;place-items:center;flex:none}
+.fold-ico .folder-art{width:32px}
+.fold-title h2{margin:0;font-size:17px;font-weight:600}
+.fold-title p{margin:2px 0 0;font-size:13px;color:var(--ink-3)}
+.recs{padding:0}
+
+/* Contacts */
+.blank{display:grid;justify-items:center;gap:10px;text-align:center;padding:40px 16px 34px}
+.blank .ic{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;background:var(--brand-tint)}
+.blank .ic svg.i{width:34px;height:34px;color:var(--brand)}
+.blank b{font-size:17px;color:var(--ink)}
+.blank p{margin:0 0 8px;max-width:420px;color:var(--ink-3);line-height:1.55}
+.contacts{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.contact{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 14px 14px 16px;border:1px solid var(--line);border-radius:12px}
+.contact .ava{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--brand-tint)}
+.contact .ava svg.i{width:20px;height:20px;color:var(--brand)}
+.contact b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.contact small{display:block;font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.contact .acts{display:flex;gap:2px}
+.contact .acts a,.contact .acts button{width:34px;height:34px;border-radius:8px;display:grid;place-items:center}
+.contact .acts a:hover,.contact .acts button:hover{background:var(--hover)}
+.contact .acts svg.i{width:16px;height:16px;color:var(--ink-2)}
+.trade{display:inline-block;margin-top:4px;padding:1px 8px;border-radius:999px;background:var(--hover);font-size:11.5px;font-weight:500;color:var(--ink-2)}
+
+/* Service history */
+.svc{display:grid;gap:12px}
+.svc-row{border:1px solid var(--line);border-radius:14px;background:var(--hover);overflow:hidden}
+.svc-h{width:100%;display:grid;grid-template-columns:56px minmax(0,1fr) 24px;gap:16px;align-items:center;padding:14px 18px;text-align:left}
+.svc-h .fi{width:56px;height:56px;border-radius:12px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line)}
+.svc-h .fi svg.i{width:26px;height:26px;color:var(--brand);fill:var(--brand)}
+.svc-h b{display:block;font-weight:600;font-size:15px}
+.svc-h small{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12.5px;color:var(--ink-3);flex-wrap:wrap}
+.svc-h small .pill{padding:2px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink-2);font-weight:500}
+.svc-h small svg.i{width:13px;height:13px}
+.svc-h .chev{width:20px;height:20px;color:var(--ink-3);transition:transform .2s}
+.svc-row.open .svc-h .chev{transform:rotate(90deg)}
+.svc-h:hover b{color:var(--brand)}
+.recs{list-style:none;margin:0;padding:0 18px 14px;display:grid;gap:8px}
+.rec{display:grid;grid-template-columns:minmax(0,1fr) auto 32px;gap:12px;align-items:center;padding:12px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}
+.rec b{display:block;font-weight:500}
+.rec small{display:block;font-size:12.5px;color:var(--ink-3);margin-top:2px}
+.rec .cost{font-weight:600;font-size:13.5px}
+.recs .none{padding:4px 2px;font-size:13px;color:var(--ink-3)}
+
+.dlg.wide{width:min(560px,100%)}
+.picks{display:flex;flex-wrap:wrap;gap:8px}
+.pick{height:34px;padding:0 14px;border-radius:17px;border:1px solid var(--line-2);font-size:13.5px;font-weight:500;color:var(--ink-2);background:var(--surface)}
+.pick:hover{border-color:var(--ink-3);color:var(--ink)}
+.pick[aria-checked="true"]{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.field.err .pick{border-color:var(--red)}
+.field.err .ctl input{border-color:var(--red)}
+.drop{position:relative;display:grid;justify-items:center;gap:6px;padding:22px 16px;border:1.5px dashed var(--line-2);border-radius:12px;text-align:center;cursor:pointer;color:var(--ink-2);background:var(--hover)}
+.drop:hover,.drop.over{border-color:var(--brand);background:var(--brand-tint)}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.drop u{color:var(--brand);text-decoration:none;font-weight:600}
+.drop small{color:var(--ink-3);font-size:12px}
+.up-files{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.up-files:empty{display:none}
+.up-files li{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;font-size:13.5px}
+.up-files .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.field.err .drop{border-color:var(--red)}
+.missing{text-align:center;padding:80px 16px}
+.missing h1{margin:0 0 8px}
+.missing p{color:var(--ink-3);margin:0 0 18px}
+
+@media (max-width:900px){.hero{grid-template-columns:1fr}.gal{position:static}}
+@media (max-width:640px){
+  .two{grid-template-columns:1fr}
+  .panel{padding:18px 16px 22px}
+  .facts{grid-template-columns:1fr}
+  .fact.rl{border-right:0}
+  .fact:nth-last-child(2){border-bottom:1px solid var(--line)}
+  .sum h1{font-size:24px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="logo" href="home-dashboard.html"><img src="assets/logo-mark.png" alt="" width="150" height="130"><span>Home Record Keeper</span></a>
+    <nav class="nav" aria-label="Main">
+      <a href="home-dashboard.html">Overview</a>
+      <a href="spaces.html">Spaces</a>
+      <a href="items.html" aria-current="page">Items</a>
+      <a href="documents.html">Documents</a>
+      <a href="checklists.html">Checklists<span class="nav-n">4</span></a>
+      <a href="activity.html">Activity</a>
+      <a href="access.html">Property access</a>
+    </nav>
+    <div class="top-r">
+      <button class="bell" aria-label="Notifications (12 unread)"><svg class="i"><use href="#i-bell"/></svg><i></i></button>
+      <span class="av" role="img" aria-label="Brady Ricci"></span>
+    </div>
+  </div>
+</header>
+
+<main class="page" id="page"></main>
+
+<script src="assets/hrk.js"></script>
+<script>
+(function(){
+  const {store, docs, systems, ico, esc, plural, toast, dialog, menu, readPhoto, fileIcon} = HRK;
+  const {SYSTEMS, systemOf, sysChip} = systems;
+  const $ = s => document.querySelector(s);
+  const folderArt = `<svg class="folder-art" viewBox="0 0 64 48" aria-hidden="true"><path class="back" d="M2 6a4 4 0 0 1 4-4h16l5 6h31a4 4 0 0 1 4 4v30a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z"/><path class="front" d="M2 14a4 4 0 0 1 4-4h52a4 4 0 0 1 4 4v28a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z"/></svg>`;
+  const miniFolder = `<svg class="mini" viewBox="0 0 64 48" aria-hidden="true"><path fill="#8FB2EE" d="M2 6a4 4 0 0 1 4-4h16l5 6h31a4 4 0 0 1 4 4v30a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z"/><path fill="#A9C6F7" d="M2 14a4 4 0 0 1 4-4h52a4 4 0 0 1 4 4v28a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z"/></svg>`;
+  const tile = (attr, name, sub) => `<button type="button" class="tile-btn" ${attr}><span class="box">${folderArt}</span><span class="meta">${miniFolder}<span class="txt"><b>${esc(name)}</b><small>${sub}</small></span></span></button>`;
+  const FOLDER = '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 6.5a2 2 0 0 1 2-2h5l2 2h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2h-15a2 2 0 0 1-2-2z" stroke="none"/><path d="M2.5 9h19" stroke="#fff" stroke-width="1.4"/></svg>';
+  const SERVICE = ['Corrective Maint. & Repairs', 'Preventative Maintenance', 'Emergency Services', 'Inspections & Audits'];
+  const TRADES = ['Plumber', 'Electrician', 'HVAC technician', 'Appliance repair', 'Handyman', 'Manufacturer support', 'Installer', 'Other'];
+  const fmtDate = iso => iso ? new Date(iso + 'T12:00').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
+
+  /* Hash: #<item id> or #<item id>--docs / --contacts / --service (plain tokens only) */
+  const [id, startTab] = location.hash.slice(1).split('--');
+  let tab = ['info', 'docs', 'contacts', 'service'].includes(startTab) ? startTab : 'info';
+  let photoAt = 0, folder = '', openSvc = '';
+
+  const find = () => { for (const s of store.all()){ const it = s.items.find(i => i.id === id); if (it) return {s, it}; } return {}; };
+  const save = data => { const {s, it} = find(); store.updateItem(s.id, it.id, data); };
+  const photosOf = it => it.photos && it.photos.length ? it.photos : (it.photo ? [it.photo] : []);
+  const itemDocs = (s, it) => docs.all().filter(d => d.type === 'item' && d.space === s.id && d.item === it.name);
+  const writeHash = () => history.replaceState(null, '', '#' + id + (tab === 'info' ? '' : '--' + tab));
+
+  function render(){
+    const {s, it} = find();
+    if (!it){
+      document.title = 'Item not found';
+      $('#page').innerHTML = `<div class="missing"><h1>This item isn't here</h1><p>It may have been deleted or moved.</p><a class="btn primary" href="items.html">${ico('left')}Back to items</a></div>`;
+      return;
+    }
+    document.title = it.name + ' · Items';
+    const sub = s.subs.find(x => x.id === it.sub), photos = photosOf(it), dl = itemDocs(s, it);
+    photoAt = Math.min(photoAt, Math.max(0, photos.length - 1));
+    const contacts = it.contacts || [], recs = it.service || [];
+    $('#page').innerHTML = `
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="home-dashboard.html">Vail Residence</a>${ico('right')}<a href="items.html">Items</a>${ico('right')}<span aria-current="page">${esc(it.name)}</span></nav>
+      <section class="hero">
+        <div class="gal">
+          <div class="gal-main${photos.length ? '' : ' none'}">
+            ${photos.length ? `<img src="${esc(photos[photoAt])}" alt="${esc(it.name)}, photo ${photoAt + 1} of ${photos.length}">` : `<div class="gal-empty"><b>No photos yet</b><span>Add photos so anyone can spot this item</span></div>`}
+            ${photos.length > 1 ? `<button type="button" class="nav-btn prev" data-step="-1" aria-label="Previous photo">${ico('left')}</button><button type="button" class="nav-btn next" data-step="1" aria-label="Next photo">${ico('right')}</button>` : ''}
+            <input type="file" accept="image/*" multiple id="addPhotos" aria-label="Add photos" hidden>
+            ${photos.length ? `<span class="count">${photoAt + 1}/${photos.length}</span>` : ''}
+          </div>
+          ${photos.length > 1 ? `<div class="thumbs">${photos.map((p, n) => `<button type="button" data-photo="${n}" aria-label="Show photo ${n + 1}" aria-current="${n === photoAt}"><img src="${esc(p)}" alt=""></button>`).join('')}</div>` : ''}
+        </div>
+        <div class="sum">
+          <div class="sum-h">
+            <div><h1>${esc(it.name)}</h1>${it.model ? `<p class="model">${esc(it.model)}</p>` : ''}</div>
+            <div class="sum-act">
+              <button type="button" class="ib" id="more" aria-label="More actions" aria-haspopup="menu">${ico('more')}</button>
+            </div>
+          </div>
+          <div class="facts">
+            <div class="fact rl"><small>Floor</small><b>${esc(store.floor(s.floor).name)}</b></div>
+            <div class="fact"><small>System</small><b>${sysChip(systemOf(it))}</b></div>
+            <div class="fact" style="grid-column:1/-1;border-right:0"><small>Space and sub-space</small><b class="path"><a href="space.html#${s.id}">${esc(s.name)}</a>${sub ? `${ico('right')}<a href="space.html#${s.id}--${sub.id}">${esc(sub.name)}</a>` : ''}</b></div>
+            <div class="fact rl"><small>Purchased</small><b class="${it.purchased ? '' : 'muted'}">${it.purchased ? fmtDate(it.purchased) : 'Not set'}</b></div>
+            <div class="fact"><small>Next reminder</small><b class="${it.reminder ? '' : 'muted'}">${it.reminder ? fmtDate(it.reminder) : 'Not set'}</b></div>
+          </div>
+          <section class="tabs-card">
+            <div class="tabbar" role="tablist" aria-label="Item details">
+              ${[['info', 'Info'], ['docs', 'Docs', dl.length], ['contacts', 'Contacts', contacts.length], ['service', 'Service history', recs.length]]
+                .map(([k, l, n]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${k === tab}">${l}${n !== undefined ? `<span class="n">${n}</span>` : ''}</button>`).join('')}
+            </div>
+            <div class="panel" role="tabpanel" id="panel"></div>
+          </section>
+        </div>
+      </section>
+`;
+    drawPanel();
+  }
+
+  function drawPanel(){
+    const {s, it} = find(), P = $('#panel');
+    if (tab === 'info'){
+      P.innerHTML = `<div class="info">
+        <div class="field"><span class="lab">Description</span><div class="desc${it.desc ? '' : ' muted'}">${esc(it.desc || 'No description yet.')}</div></div>
+        <div class="two">
+          <div class="field"><label for="purchased">Purchased date</label><div class="ctl"><input type="date" id="purchased" value="${esc(it.purchased || '')}"></div></div>
+          <div class="field"><label for="reminder">Reminder date</label><div class="ctl"><input type="date" id="reminder" value="${esc(it.reminder || '')}"></div></div>
+        </div>
+        <div class="field"><label for="notes">Reminder notes</label><div class="ctl"><textarea id="notes" maxlength="500" placeholder="Add a quick note so you remember the context when the reminder arrives.">${esc(it.notes || '')}</textarea></div></div>
+        <div class="info-f"><span class="hint" id="hint">No changes</span>
+          <button type="button" class="btn" id="infoReset" disabled>Discard</button>
+          <button type="button" class="btn primary" id="infoSave" disabled>${ico('check')}Save changes</button></div>
+      </div>`;
+      /* Edits stay as a draft until Save */
+      const val = () => ({purchased: $('#purchased').value, reminder: $('#reminder').value, notes: $('#notes').value.trim()});
+      const orig = {purchased: it.purchased || '', reminder: it.reminder || '', notes: (it.notes || '').trim()};
+      const dirty = () => Object.keys(orig).some(k => val()[k] !== orig[k]);
+      const sync = () => { const d = dirty(); $('#infoSave').disabled = !d; $('#infoReset').disabled = !d; $('#hint').textContent = d ? 'Unsaved changes' : 'No changes'; $('#hint').classList.toggle('on', d); };
+      ['#purchased', '#reminder', '#notes'].forEach(s => $(s).addEventListener('input', sync));
+      $('#infoReset').onclick = () => drawPanel();
+      $('#infoSave').onclick = () => { save(val()); render(); toast('Item details saved'); };
+      return;
+    }
+    if (tab === 'docs'){
+      const dl = itemDocs(s, it), folders = docs.folders('item');
+      if (folder){
+        const list = dl.filter(d => d.folder === folder).sort((a, b) => b.date.localeCompare(a.date));
+        P.innerHTML = `<div class="panel-h"><button type="button" class="back" id="back">${ico('left')}All folders</button>
+            <button type="button" class="btn primary" id="addDoc">${ico('upload')}Upload to ${esc(folder)}</button></div>
+          <div class="fold-title"><span class="fold-ico">${folderArt}</span><div><h2>${esc(folder)}</h2><p>${plural(list.length, 'document')}</p></div></div>
+          ${list.length ? `<ul class="doclist">${list.map(d => `<li>${fileIcon(d)}<span class="nm"><b>${esc(d.name)}</b><small>${docs.fmtSize(d.size)}</small></span><time>${fmtDate(d.date)}</time>
+            <button type="button" class="ib" data-rmdoc="${d.id}" aria-label="Delete ${esc(d.name)}">${ico('trash')}</button></li>`).join('')}</ul>`
+            : `<div class="empty-state"><b>No documents in ${esc(folder)} yet</b>Upload a file to keep it with this item.</div>`}`;
+        return;
+      }
+      P.innerHTML = `<div class="panel-h"><div><h2>Documents</h2><p>${plural(dl.length, 'document')} for this item</p></div>
+          <button type="button" class="btn primary" id="addDoc">${ico('upload')}Add document</button></div>
+        <div class="tiles">${folders.map(f => tile(`data-folder="${esc(f)}"`, f, plural(dl.filter(d => d.folder === f).length, 'document'))).join('')}</div>`;
+      return;
+    }
+    if (tab === 'contacts'){
+      const list = it.contacts || [];
+      P.innerHTML = !list.length ? `<div class="blank"><span class="ic">${ico('users')}</span><b>No service providers linked</b>
+          <p>Link a service provider so you can quickly call or email them when this item needs attention.</p>
+          <button type="button" class="btn primary" id="addContact">${ico('useradd')}Link a service provider</button></div>`
+        : `<div class="panel-h"><div><h2>Service providers</h2><p>${plural(list.length, 'contact')} linked to this item</p></div>
+          <button type="button" class="btn primary" id="addContact">${ico('useradd')}Link a service provider</button></div>
+          <ul class="contacts">${list.map((c, n) => `<li class="contact"><span class="ava">${ico('user')}</span>
+            <span style="min-width:0"><b>${esc(c.name)}</b><small>${esc([c.company, c.phone].filter(Boolean).join(' · ') || c.email || '')}</small>${c.trade ? `<span class="trade">${esc(c.trade)}</span>` : ''}</span>
+            <span class="acts">${c.phone ? `<a href="tel:${esc(c.phone.replace(/[^\d+]/g, ''))}" aria-label="Call ${esc(c.name)}" title="Call">${ico('phone')}</a>` : ''}${c.email ? `<a href="mailto:${esc(c.email)}" aria-label="Email ${esc(c.name)}" title="Email">${ico('mail')}</a>` : ''}
+              <button type="button" data-rmc="${n}" aria-label="Unlink ${esc(c.name)}" title="Unlink">${ico('x')}</button></span></li>`).join('')}</ul>`;
+      return;
+    }
+    const recs = it.service || [];
+    P.innerHTML = `<div class="panel-h"><div><h2>Service history</h2><p>${recs.length ? plural(recs.length, 'record') : 'Nothing logged yet'}</p></div>
+        <button type="button" class="btn primary" id="addRec">${ico('plus')}Add service record</button></div>
+      ${openSvc ? (() => {
+        const list = recs.filter(r => r.cat === openSvc).sort((a, b) => b.date.localeCompare(a.date));
+        return `<button type="button" class="back" data-svc="">${ico('left')}All service types</button>
+          <div class="fold-title"><span class="fold-ico">${folderArt}</span><div><h2>${esc(openSvc)}</h2><p>${plural(list.length, 'record')}${list.length ? ' · last serviced ' + fmtDate(list[0].date) : ''}</p></div></div>
+          ${list.length ? `<ul class="recs">${list.map(r => `<li class="rec"><span><b>${esc(r.title)}</b><small>${fmtDate(r.date)}${r.provider ? ' · ' + esc(r.provider) : ''}${r.notes ? ' · ' + esc(r.notes) : ''}</small></span>
+            <span class="cost">${r.cost ? '$' + Number(r.cost).toLocaleString('en-US') : ''}</span>
+            <button type="button" class="ib" data-rmrec="${r.id}" aria-label="Delete ${esc(r.title)}">${ico('trash')}</button></li>`).join('')}</ul>`
+            : `<div class="empty-state"><b>No records yet</b>Use Add service record to log work done under ${esc(openSvc)}.</div>`}`;
+      })() : `<div class="tiles svc-tiles">${SERVICE.map(c => { const list = recs.filter(r => r.cat === c).sort((a, b) => b.date.localeCompare(a.date));
+        return tile(`data-svc="${esc(c)}"`, c, list.length ? `${plural(list.length, 'record')} · last ${fmtDate(list[0].date)}` : 'Not serviced yet'); }).join('')}</div>`}`;
+  }
+
+  /* ---------- Dialogs ---------- */
+  function docDialog(){
+    const {s, it} = find();
+    let cat = folder || '', files = [];
+    dialog({
+      title: 'Add document', ok: 'Upload', size: 'wide',
+      body: `<p>For <b>${esc(it.name)}</b></p>
+        <div class="field"><span class="lab">Folder</span><div class="picks" id="dCats" role="radiogroup" aria-label="Folder"></div><span class="msg" hidden>Pick a folder.</span></div>
+        <div class="field"><span class="lab">Files</span>
+          <label class="drop" id="dDrop"><input type="file" id="dInput" multiple aria-label="Choose files"><span><b>Drag files here</b> or <u>browse</u></span><small>PDF, Word, Excel or photos · up to 25 MB each</small></label>
+          <ul class="up-files" id="dFiles"></ul><span class="msg" hidden>Add at least one file.</span></div>`,
+      onOpen(bg){
+        const draw = () => {
+          bg.querySelector('#dCats').innerHTML = docs.folders('item').map(f => `<button type="button" class="pick" role="radio" data-cat="${esc(f)}" aria-checked="${f === cat}">${esc(f)}</button>`).join('');
+          bg.querySelector('#dFiles').innerHTML = files.map(f => `<li>${fileIcon({name:f.name})}<span class="nm">${esc(f.name)}</span><small>${docs.fmtSize(f.size / 1024)}</small></li>`).join('');
+        };
+        bg.querySelector('#dCats').onclick = e => { const b = e.target.closest('[data-cat]'); if (b){ cat = b.dataset.cat; draw(); } };
+        bg.querySelector('#dInput').onchange = e => { files = [...files, ...e.target.files]; e.target.value = ''; draw(); };
+        const dz = bg.querySelector('#dDrop');
+        ['dragenter', 'dragover'].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.add('over'); }));
+        ['dragleave', 'drop'].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.remove('over'); }));
+        dz.addEventListener('drop', e => { files = [...files, ...e.dataTransfer.files]; draw(); });
+        bg._st = () => ({cat, files});
+        draw();
+      },
+      onOk(bg){
+        const {cat: c, files: list} = bg._st();
+        const flag = (sel, bad) => { const f = bg.querySelector(sel).closest('.field'); f.classList.toggle('err', bad); f.querySelector('.msg').hidden = !bad; return bad; };
+        const e1 = flag('#dCats', !c), e2 = flag('#dFiles', !list.length);
+        if (e1 || e2) return false;
+        list.forEach(f => docs.add({name:f.name, type:'item', folder:c, size:f.size / 1024, space:s.id, item:it.name}));
+        folder = c; render(); toast(`${plural(list.length, 'document')} added to ${c}`);
+      }
+    });
+  }
+
+  function contactDialog(){
+    dialog({
+      title: 'Link a service provider', ok: 'Link provider', size: 'wide',
+      body: `<div class="two">
+          <div class="field"><label for="cName">Name</label><div class="ctl"><input id="cName" maxlength="60" placeholder="e.g. Mike Torres" autocomplete="off"></div><span class="msg" hidden>Add a name.</span></div>
+          <div class="field"><label for="cCo">Company</label><div class="ctl"><input id="cCo" maxlength="60" placeholder="e.g. Alpine Heating" autocomplete="off"></div></div>
+        </div>
+        <div class="field"><label for="cTrade">Trade</label><div class="ctl sel"><select id="cTrade"><option value="">Choose a trade</option>${TRADES.map(t => `<option>${t}</option>`).join('')}</select></div></div>
+        <div class="two">
+          <div class="field"><label for="cPhone">Phone</label><div class="ctl"><input id="cPhone" type="tel" placeholder="(970) 555-0142" autocomplete="off"></div></div>
+          <div class="field"><label for="cEmail">Email</label><div class="ctl"><input id="cEmail" type="email" placeholder="name@company.com" autocomplete="off"></div><span class="msg" hidden>Add a phone number or an email.</span></div>
+        </div>`,
+      onOk(bg){
+        const v = s => bg.querySelector(s).value.trim();
+        const flag = (sel, bad) => { const f = bg.querySelector(sel).closest('.field'); f.classList.toggle('err', bad); f.querySelector('.msg').hidden = !bad; return bad; };
+        const e1 = flag('#cName', !v('#cName')), e2 = flag('#cEmail', !v('#cPhone') && !v('#cEmail'));
+        if (e1 || e2) return false;
+        const {it} = find();
+        save({contacts: [...(it.contacts || []), {name:v('#cName'), company:v('#cCo'), trade:v('#cTrade'), phone:v('#cPhone'), email:v('#cEmail')}]});
+        render(); toast(`${v('#cName')} linked to ${it.name}`);
+      }
+    });
+  }
+
+  function recordDialog(){
+    const {it} = find(), people = (it.contacts || []).map(c => c.company ? `${c.name} (${c.company})` : c.name);
+    let cat = openSvc || '';
+    dialog({
+      title: 'Add service record', ok: 'Save record', size: 'wide',
+      body: `<div class="field"><span class="lab">Type of service</span><div class="picks" id="rCats" role="radiogroup" aria-label="Type of service"></div><span class="msg" hidden>Pick a type.</span></div>
+        <div class="field"><label for="rTitle">What was done?</label><div class="ctl"><input id="rTitle" maxlength="80" placeholder="e.g. Replaced ignitor and cleaned burners" autocomplete="off"></div><span class="msg" hidden>Describe the service.</span></div>
+        <div class="two">
+          <div class="field"><label for="rDate">Date</label><div class="ctl"><input id="rDate" type="date" value="${new Date().toISOString().slice(0, 10)}"></div></div>
+          <div class="field"><label for="rCost">Cost</label><div class="ctl"><input id="rCost" type="number" min="0" step="1" placeholder="$0"></div></div>
+        </div>
+        <div class="field"><label for="rProv">Service provider</label><div class="ctl"><input id="rProv" list="rProvList" maxlength="80" placeholder="Who did the work?" autocomplete="off"></div>
+          <datalist id="rProvList">${people.map(p => `<option value="${esc(p)}">`).join('')}</datalist></div>
+        <div class="field"><label for="rNotes">Notes</label><div class="ctl"><textarea id="rNotes" maxlength="400" placeholder="Parts used, warranty on the work, next visit…"></textarea></div></div>`,
+      onOpen(bg){
+        const draw = () => bg.querySelector('#rCats').innerHTML = SERVICE.map(c => `<button type="button" class="pick" role="radio" data-cat="${esc(c)}" aria-checked="${c === cat}">${esc(c)}</button>`).join('');
+        bg.querySelector('#rCats').onclick = e => { const b = e.target.closest('[data-cat]'); if (b){ cat = b.dataset.cat; draw(); } };
+        bg._cat = () => cat; draw();
+      },
+      onOk(bg){
+        const v = s => bg.querySelector(s).value.trim(), c = bg._cat();
+        const flag = (sel, bad) => { const f = bg.querySelector(sel).closest('.field'); f.classList.toggle('err', bad); f.querySelector('.msg').hidden = !bad; return bad; };
+        const e1 = flag('#rCats', !c), e2 = flag('#rTitle', !v('#rTitle'));
+        if (e1 || e2) return false;
+        const {it} = find();
+        save({service: [...(it.service || []), {id:'r' + Date.now(), cat:c, title:v('#rTitle'), date:v('#rDate') || new Date().toISOString().slice(0, 10), cost:v('#rCost'), provider:v('#rProv'), notes:v('#rNotes')}]});
+        openSvc = c; render(); toast(`Service record added to ${c}`);
+      }
+    });
+  }
+
+  /* ---------- Events ---------- */
+  document.addEventListener('click', e => {
+    const t = e.target;
+    const step = t.closest('[data-step]'); if (step){ const n = photosOf(find().it).length; photoAt = (photoAt + +step.dataset.step + n) % n; return render(); }
+    const ph = t.closest('[data-photo]'); if (ph){ photoAt = +ph.dataset.photo; return render(); }
+    const tb = t.closest('[data-tab]'); if (tb){ tab = tb.dataset.tab; folder = ''; openSvc = ''; writeHash(); return render(); }
+    const fo = t.closest('[data-folder]'); if (fo){ folder = fo.dataset.folder; return drawPanel(); }
+    if (t.closest('#back')){ folder = ''; return drawPanel(); }
+    if (t.closest('#addDoc')) return docDialog();
+    if (t.closest('#addContact')) return contactDialog();
+    if (t.closest('#addRec')) return recordDialog();
+    const sv = t.closest('[data-svc]'); if (sv){ openSvc = sv.dataset.svc; return drawPanel(); }
+    const rd = t.closest('[data-rmdoc]'); if (rd){ const d = docs.get(rd.dataset.rmdoc); dialog({title:'Delete document?', ok:'Delete', danger:true, size:'sm', body:`<p><b>${esc(d.name)}</b> will be removed from this item.</p>`, onOk(){ docs.remove(d.id); render(); toast('Document deleted'); }}); return; }
+    const rc = t.closest('[data-rmc]'); if (rc){ const {it} = find(), list = [...(it.contacts || [])], [c] = list.splice(+rc.dataset.rmc, 1); save({contacts:list}); render(); toast(`${c.name} unlinked`); return; }
+    const rr = t.closest('[data-rmrec]'); if (rr){ const {it} = find(); save({service:(it.service || []).filter(r => r.id !== rr.dataset.rmrec)}); render(); toast('Service record deleted'); return; }
+    const more = t.closest('#more'); if (more){
+      const {s, it} = find();
+      menu(more, [
+        {icon:'edit', label:'Edit item', run(){ HRK.addItemDialog({space:s.id, item:it, onSaved(){ render(); }}); }},
+        '-',
+        {icon:'trash', label:'Delete item', danger:true, run(){ dialog({title:'Delete item?', ok:'Delete item', danger:true, size:'sm', body:`<p><b>${esc(it.name)}</b> and its photos, contacts and service history will be removed.</p>`, onOk(){ store.deleteItem(s.id, it.id); HRK.flashNext ? HRK.flashNext(`${it.name} deleted`) : 0; location.href = 'items.html'; }}); }}
+      ]);
+    }
+  });
+  document.addEventListener('change', async e => {
+    if (e.target.id !== 'addPhotos') return;
+    const {it} = find(), list = [...photosOf(it)], before = list.length;
+    for (const f of e.target.files){ try { list.push(await readPhoto(f, 900)); } catch(err){ toast(err.message); } }
+    if (list.length === before) return;
+    try { save({photos:list, photo:list[0]}); } catch(_){ return toast('Not enough room to save more photos in this preview'); }
+    photoAt = before; render(); toast(`${plural(list.length - before, 'photo')} added`);
+  });
+  document.addEventListener('keydown', e => {
+    if (document.querySelector('.dlg-bg') || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+    const n = photosOf(find().it || {}).length;
+    if (n > 1 && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')){ photoAt = (photoAt + (e.key === 'ArrowRight' ? 1 : -1) + n) % n; render(); }
+  });
+  render();
+})();
+</script>
+</body>
+</html>

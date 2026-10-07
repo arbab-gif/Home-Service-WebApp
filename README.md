@@ -17,6 +17,8 @@ Then open http://localhost:5173. No dependencies — `server.js` is a small stat
 | `home-dashboard.html` | Overview: property card, spaces, recent documents, checklists, recent activity, property access |
 | `property-edit.html` | Edit property, with a live preview of the Overview card |
 | `spaces.html` | All spaces, grouped by floor |
+| `items.html` | Every item in the home, with search and floor / space / sub-space filters |
+| `item.html#<id>` | Item detail: photos, Info, Docs, Contacts and Service history (e.g. `item.html#mechanical-room-i0`) |
 | `space.html#<id>` | Space detail: Items and Sub-spaces tabs (e.g. `space.html#kitchen`) |
 | `documents.html` | Documents: Item / Property tabs, folders, search, upload, edit, delete |
 | `activity.html` | Activity: day-grouped timeline, filter by person, date and type |

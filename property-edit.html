@@ -33,7 +33,10 @@ svg.i{width:16px;height:16px;flex:none;color:var(--ink-3);stroke:currentColor;fi
 
 /* Top bar (same as Overview) */
 .top{background:var(--surface);border-bottom:1px solid var(--line)}
-.top-in{max-width:1240px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;gap:24px}
+/* Side space: 100px on desktop, 40px on smaller laptops and tablets, 16px on phones */
+:root{--side:100px}
+@media (max-width:1280px){:root{--side:40px}}
+.top-in{max-width:none;margin:0;padding:0 var(--side);height:60px;display:flex;align-items:center;gap:24px}
 .logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px;letter-spacing:-.015em;white-space:nowrap}
 .logo img{height:36px;width:auto}
 .nav{display:flex;align-items:stretch;gap:4px;height:100%;margin-left:12px;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
@@ -54,7 +57,7 @@ svg.i{width:16px;height:16px;flex:none;color:var(--ink-3);stroke:currentColor;fi
 }
 
 /* Page */
-.page{max-width:1240px;margin:0 auto;padding-inline:24px;padding-block:22px 120px}
+.page{max-width:none;margin:0;padding-inline:var(--side);padding-block:22px 120px}
 .back{display:inline-flex;align-items:center;gap:6px;color:var(--ink-2);font-weight:500;font-size:13.5px;margin-bottom:12px}
 .back:hover{color:var(--ink)}
 .back svg.i{color:currentColor}
@@ -213,7 +216,7 @@ svg.i{width:16px;height:16px;flex:none;color:var(--ink-3);stroke:currentColor;fi
 
 /* Save bar */
 .savebar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(20,32,46,.06);padding-bottom:env(safe-area-inset-bottom,0px);transform:translateY(0);transition:transform .25s}
-.savebar-in{max-width:1240px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:10px}
+.savebar-in{max-width:none;margin:0;padding:12px var(--side);display:flex;align-items:center;gap:10px}
 .savebar .note{flex:1;font-size:13px;color:var(--ink-3)}
 
 /* Dialog + toast */
@@ -275,6 +278,7 @@ svg.i{width:16px;height:16px;flex:none;color:var(--ink-3);stroke:currentColor;fi
     <nav class="nav" aria-label="Main">
       <a href="home-dashboard.html">Overview</a>
       <a href="spaces.html">Spaces</a>
+      <a href="items.html">Items</a>
       <a href="documents.html">Documents</a>
       <a href="checklists.html">Checklists<span class="nav-n">4</span></a>
       <a href="activity.html">Activity</a>

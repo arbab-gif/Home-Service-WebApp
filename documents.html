@@ -126,6 +126,7 @@ mark{background:var(--amber-tint);color:inherit;border-radius:3px;padding:0 1px}
     <nav class="nav" aria-label="Main">
       <a href="home-dashboard.html">Overview</a>
       <a href="spaces.html">Spaces</a>
+      <a href="items.html">Items</a>
       <a href="documents.html" aria-current="page">Documents</a>
       <a href="checklists.html">Checklists<span class="nav-n">4</span></a>
       <a href="activity.html">Activity</a>
@@ -308,8 +309,8 @@ mark{background:var(--amber-tint);color:inherit;border-radius:3px;padding:0 1px}
       body: `
         <div class="field"><span class="lab">What is this document for?</span>
           <div class="seg-choice" id="upType" role="radiogroup" aria-label="Document type">
-            <button type="button" class="opt" data-t="item" role="radio" aria-checked="${type === 'item'}"><span class="oi">${ico('box')}</span><span><b>An item</b><small>Warranty, invoice or manual</small></span></button>
-            <button type="button" class="opt" data-t="property" role="radio" aria-checked="${type === 'property'}"><span class="oi">${ico('home')}</span><span><b>The property</b><small>Legal, insurance, tax or permit</small></span></button>
+            <button type="button" class="opt" data-t="item" role="radio" aria-checked="${type === 'item'}"><span class="oi">${ico('box')}</span><span><b>An item</b></span></button>
+            <button type="button" class="opt" data-t="property" role="radio" aria-checked="${type === 'property'}"><span class="oi">${ico('home')}</span><span><b>The property</b></span></button>
           </div></div>
         <div class="field step"><span class="lab">Folder</span><div class="picks" id="upCats" role="radiogroup" aria-label="Folder"></div><span class="msg" hidden>Pick a folder.</span></div>
         <div class="field step" id="upItemF"><label for="upItem">Which item?</label>

@@ -95,6 +95,15 @@
     deleteSub(sid, subId){ const s = this.get(sid); s.subs = s.subs.filter(x => x.id !== subId); s.items.forEach(i => { if (i.sub === subId) i.sub = ''; }); save(); },
     updateItem(sid, itemId, data){ Object.assign(this.get(sid).items.find(i => i.id === itemId), data); save(); },
     addItem(sid, data){ const s = this.get(sid); s.items.unshift({id:`${sid}-i${Date.now()}`, docs:0, warranty:'', model:'', ...data}); save(); },
+    /* Update an item and move it to another space if needed (keeps its id, docs and history) */
+    moveItem(fromSid, itemId, toSid, data){
+      const from = this.get(fromSid), it = from.items.find(i => i.id === itemId), oldName = it.name;
+      Object.assign(it, data);
+      /* documents point at an item by space + name, so keep them attached */
+      docData.docs.forEach(d => { if (d.type === 'item' && d.space === fromSid && d.item === oldName){ d.space = toSid; d.item = it.name; } }); saveDocs();
+      if (toSid !== fromSid){ from.items = from.items.filter(i => i !== it); this.get(toSid).items.unshift(it); }
+      save();
+    },
     deleteItem(sid, itemId){ const s = this.get(sid); s.items = s.items.filter(i => i.id !== itemId); save(); },
     reset(){ spaces = seed(); save(); }
   };
@@ -140,6 +149,19 @@
   <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.5 6.5a4 4 0 0 0 5.2 5.2L12 19.4a2.1 2.1 0 0 1-3-3l7.7-7.7"/><path d="M14.5 6.5 17 4l3 3-2.5 2.5"/></symbol>
   <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.2 2.3 2.3 4.7-4.8"/></symbol>
   <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8v.1"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3.5 13.9 9a1.6 1.6 0 0 0 1.1 1.1l5.5 1.9-5.5 1.9a1.6 1.6 0 0 0-1.1 1.1L12 20.5 10.1 15a1.6 1.6 0 0 0-1.1-1.1L3.5 12 9 10.1A1.6 1.6 0 0 0 10.1 9z"/><path d="M19 3v3M17.5 4.5h3"/></symbol>
+  <symbol id="i-sys-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5 5L12 19a2.1 2.1 0 0 1-3-3l7.7-7.7z"/><path d="M14.7 6.3 17.5 3.5l3 3-2.8 2.8"/><circle cx="10.5" cy="17.5" r=".6"/></symbol>
+  <symbol id="i-sys-bolt" viewBox="0 0 24 24"><path d="M13 2.5 4.5 13.5H12l-1 8 8.5-11H12z"/></symbol>
+  <symbol id="i-sys-appliance" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="18" rx="1.5"/><path d="M3 10h8M8.5 6v2M8.5 12.5v3"/><rect x="13" y="7" width="8" height="14" rx="1.5"/><circle cx="17" cy="15" r="2.6"/><path d="M15 9.6h.01M17 9.6h.01"/></symbol>
+  <symbol id="i-sys-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/></symbol>
+  <symbol id="i-sys-house" viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.5l8.5 7V20a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1z"/><rect x="10" y="12" width="4" height="4" rx=".5"/></symbol>
+  <symbol id="i-sys-bulb" viewBox="0 0 24 24"><path d="M9 17.5h6M10 21h4"/><path d="M12 6a5 5 0 0 0-3 9c.6.5 1 1.3 1 2.5h4c0-1.2.4-2 1-2.5a5 5 0 0 0-3-9z"/><path d="M12 1.5V3M4.2 4.7l1 1M19.8 4.7l-1 1M2 11h1.5M20.5 11H22"/></symbol>
+  <symbol id="i-sys-car" viewBox="0 0 24 24"><path d="M3.5 16.5V12l2.2-5a1.6 1.6 0 0 1 1.5-1h9.6a1.6 1.6 0 0 1 1.5 1l2.2 5v4.5a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1z"/><path d="M3.5 12h17"/><circle cx="7.5" cy="14.8" r=".9"/><circle cx="16.5" cy="14.8" r=".9"/><path d="M6 17.5V19M18 17.5V19"/></symbol>
+  <symbol id="i-sys-siren" viewBox="0 0 24 24"><path d="M7 18v-5a5 5 0 0 1 10 0v5"/><path d="M4.5 18h15v3h-15z"/><path d="M12 3v2M4.4 6.4l1.4 1.4M19.6 6.4l-1.4 1.4M2.5 13H4M20 13h1.5"/><path d="M10.5 13a1.5 1.5 0 0 1 1.5-1.5"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 3.5h3.2l1.6 4.2-2.1 1.4a11 11 0 0 0 5.2 5.2l1.4-2.1 4.2 1.6V17a2 2 0 0 1-2 2A15.5 15.5 0 0 1 3 5.5a2 2 0 0 1 2-2z"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 7.5h3l1.6-2.5h6.8L17 7.5h3a1 1 0 0 1 1 1V19a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8.5a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.2" r="3.6"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M15.5 4.8a3.5 3.5 0 0 1 0 6.4M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3A4.5 4.5 0 0 0 13 4.6l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3A4.5 4.5 0 0 0 11 19.4l1-1"/></symbol>
   <symbol id="i-home" viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v11h13V9"/><path d="M10 20v-5.5h4V20"/></symbol>
   <symbol id="c-appliance" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 9h14M8 6h1M8 12v3"/></symbol>
   <symbol id="c-fixture" viewBox="0 0 24 24"><path d="M12 3v5M7 8h10l-1.5 5h-7z"/><path d="M12 13v8M9 21h6"/></symbol>
@@ -285,37 +307,37 @@
      Two types: item documents (linked to an item in a space) and property documents.
      Each type has folders; every document lives in one folder. */
   const DOC_FOLDERS = {
-    item: ['Warranty', 'Invoice', 'Manual'],
+    item: ['Invoices', 'Manuals', 'Warranties', 'Estimates', 'Media', 'Other'],
     property: ['Legal', 'Insurance', 'Tax', 'Permit']
   };
   /* [name, type, folder, date (ISO), size KB, space id, item name, thumbnail] */
   const DOC_SEED = [
-    ['Lennox furnace warranty.pdf','item','Warranty','2026-10-06',1240,'mechanical-room','Lennox furnace'],
+    ['Lennox furnace warranty.pdf','item','Warranties','2026-10-06',1240,'mechanical-room','Lennox furnace'],
     ['Homeowners policy 2026–27.pdf','property','Insurance','2026-10-07',2310],
-    ['Furnace service invoice.pdf','item','Invoice','2026-10-07',240,'mechanical-room','Lennox furnace'],
+    ['Furnace service invoice.pdf','item','Invoices','2026-10-07',240,'mechanical-room','Lennox furnace'],
     ['Warranty deed, 123 Alpine Dr.pdf','property','Legal','2026-09-30',880],
-    ['Sub-Zero BI-36 use and care.pdf','item','Manual','2026-09-28',4810,'kitchen','Sub-Zero refrigerator'],
-    ['Hot tub cover receipt.jpg','item','Invoice','2026-09-22',3100,'deck-hot-tub','Hot tub','assets/items/hot-tub.jpg'],
+    ['Sub-Zero BI-36 use and care.pdf','item','Manuals','2026-09-28',4810,'kitchen','Sub-Zero refrigerator'],
+    ['Hot tub cover receipt.jpg','item','Invoices','2026-09-22',3100,'deck-hot-tub','Hot tub','assets/items/hot-tub.jpg'],
     ['Home contents inventory.xlsx','property','Insurance','2026-09-18',96],
     ['HOA covenants and rules.docx','property','Legal','2026-09-10',412],
     ['Deck re-stain permit B26-0418.pdf','property','Permit','2026-08-30',610],
-    ['Bosch dishwasher warranty.pdf','item','Warranty','2026-08-26',880,'kitchen','Bosch dishwasher'],
-    ['Wolf range manual.pdf','item','Manual','2026-07-14',6200,'kitchen','Wolf range'],
-    ['Rheem water heater warranty.pdf','item','Warranty','2026-06-02',520,'mechanical-room','Rheem water heater'],
-    ['Washer and dryer receipt.pdf','item','Invoice','2026-05-19',180,'laundry','Washer and dryer'],
+    ['Bosch dishwasher warranty.pdf','item','Warranties','2026-08-26',880,'kitchen','Bosch dishwasher'],
+    ['Wolf range manual.pdf','item','Manuals','2026-07-14',6200,'kitchen','Wolf range'],
+    ['Rheem water heater warranty.pdf','item','Warranties','2026-06-02',520,'mechanical-room','Rheem water heater'],
+    ['Washer and dryer receipt.pdf','item','Invoices','2026-05-19',180,'laundry','Washer and dryer'],
     ['2026 property tax statement.pdf','property','Tax','2026-04-15',330],
     ['Flood insurance declaration.pdf','property','Insurance','2026-03-02',290],
-    ['Snowblower manual.pdf','item','Manual','2026-01-11',3400,'garage','Snowblower'],
+    ['Snowblower manual.pdf','item','Manuals','2026-01-11',3400,'garage','Snowblower'],
     ['2025 property tax receipt.pdf','property','Tax','2025-12-01',150],
-    ['Hot tub owner\'s manual.pdf','item','Manual','2025-11-03',7800,'deck-hot-tub','Hot tub'],
+    ['Hot tub owner\'s manual.pdf','item','Manuals','2025-11-03',7800,'deck-hot-tub','Hot tub'],
     ['Survey and plat map.pdf','property','Legal','2025-08-12',2050],
-    ['Gas grill invoice.pdf','item','Invoice','2025-06-21',120,'deck-hot-tub','Gas grill']
+    ['Gas grill invoice.pdf','item','Invoices','2025-06-21',120,'deck-hot-tub','Gas grill']
   ];
   const docSeed = () => ({
     folders: {item:[...DOC_FOLDERS.item], property:[...DOC_FOLDERS.property]},
     docs: DOC_SEED.map((d, n) => ({id:'d' + n, name:d[0], type:d[1], folder:d[2], date:d[3], size:d[4], space:d[5] || '', item:d[6] || '', thumb:d[7] || null}))
   });
-  const DKEY = 'hrk-docs-v1';
+  const DKEY = 'hrk-docs-v2';
   let docData = (() => { try { const raw = sessionStorage.getItem(DKEY); if (raw) return JSON.parse(raw); } catch(_){} return docSeed(); })();
   const saveDocs = () => { try { sessionStorage.setItem(DKEY, JSON.stringify(docData)); } catch(_){} };
 
@@ -453,14 +475,14 @@
   /* [days ago, time, who, type, verb, target, context] */
   const ACT_SEED = [
     [0,'14:14','brady','checklist','checked off','Replace batteries in all four outdoor cameras','Routine work'],
-    [0,'11:02','alice','document','uploaded','Furnace service invoice.pdf','Item documents › Invoice'],
+    [0,'11:02','alice','document','uploaded','Furnace service invoice.pdf','Item documents › Invoices'],
     [1,'17:40','brady','checklist','checked off','Put sleds back up into attic over garage','Routine work'],
     [1,'09:15','hrk','checklist','assigned','Winterization','6 tasks'],
     [2,'16:48','michael','document','viewed','Homeowners policy 2026–27.pdf','Property documents › Insurance'],
     [3,'20:30','brady','access','shared access with','alex@gmail.com','Viewer · until Nov 6'],
     [4,'13:12','alice','space','added','Hot tub','Deck and hot tub › Lower deck'],
     [5,'10:05','brady','checklist','completed','Main floor inspection','3 tasks'],
-    [6,'15:20','brady','document','uploaded','Lennox furnace warranty.pdf','Item documents › Warranty'],
+    [6,'15:20','brady','document','uploaded','Lennox furnace warranty.pdf','Item documents › Warranties'],
     [8,'09:02','brady','property','updated','property details','Bathrooms changed to 2'],
     [10,'18:22','brady','access',"changed the role of",'Michael Brown','Editor → Viewer'],
     [12,'12:40','alice','space','added a photo to','Laundry','Main floor'],
@@ -469,7 +491,7 @@
     [23,'19:10','michael','document','viewed','Warranty deed, 123 Alpine Dr.pdf','Property documents › Legal'],
     [27,'10:47','brady','space','added','Coffee bar','Kitchen'],
     [34,'16:05','hrk','checklist','assigned','Quarterly inspection','Template'],
-    [38,'11:20','brady','document','deleted','Old dryer receipt.pdf','Item documents › Invoice'],
+    [38,'11:20','brady','document','deleted','Old dryer receipt.pdf','Item documents › Invoices'],
     [46,'09:33','alice','checklist','completed','August routine','3 tasks'],
     [53,'15:58','brady','access','shared access with','Alice Johnson','Editor · until Nov 6'],
     [61,'13:14','brady','document','uploaded','Survey and plat map.pdf','Property documents › Legal'],
@@ -611,7 +633,7 @@
     row(n, tag = 'li'){
       const k = NOTE_KINDS[n.kind] || NOTE_KINDS.info;
       return `<${tag} class="nt${n.read ? '' : ' unread'}" data-note="${n.id}" tabindex="0" role="button" aria-label="${esc(n.title)}${n.read ? '' : ', unread'}">
-        <span class="nt-ic k-${n.kind}">${ico(k.icon)}</span>
+        <span class="nt-ic"><img src="assets/logo-mark.png" alt=""></span>
         <span class="nt-tx"><b>${esc(n.title)}</b><small><span>${esc(n.where)}</span><span class="nt-dot-sep">·</span><span>${notes.when(n.at)}</span></small></span>
         <span class="nt-dot" aria-hidden="true"></span></${tag}>`;
     }
@@ -621,9 +643,13 @@
   document.head.insertAdjacentHTML('beforeend', `<style>
     .nt{display:grid;grid-template-columns:44px minmax(0,1fr) 10px;gap:14px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);cursor:pointer;text-align:left}
     .nt:last-child{border-bottom:0}
+    .sys{display:inline-flex;align-items:center;gap:9px;min-width:0;max-width:100%;color:var(--ink);white-space:nowrap}
+    .sys-ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none}
+    .sys-ic svg.i{width:16px;height:16px;color:inherit}
     .nt:hover,.nt:focus-visible{background:var(--hover);outline:none}
     .nt-ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center}
-    .nt-ic svg.i{width:20px;height:20px}
+    .nt-ic{background:var(--surface);border:1px solid var(--line)}
+    .nt-ic img{width:70%;height:70%;object-fit:contain;display:block}
     .k-warning{background:#FDF1DD}.k-warning svg.i{color:#B7700E}
     .k-reminder{background:#EFEBFA}.k-reminder svg.i{color:#6A55B8}
     .k-service{background:#E3F2F1}.k-service svg.i{color:#2B7F78}
@@ -691,5 +717,330 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && bellPop){ closeBell(); const b = document.querySelector('.bell'); b && b.focus(); } });
   syncBell();
 
-  window.HRK = {store, docs, checklists, activity, access, notes, fileIcon, ext, ico, esc, plural, toast, flashNext, dialog, menu, closePop, readPhoto, pickPhoto, thumb, spaceDialog, deleteSpaceDialog, CATS};
+
+  /* ---------- HRK systems: the 8 home systems, used by Items and Item detail ---------- */
+  /* Home systems (with icon + colour), and a best guess for items saved before systems existed */
+  const SYSTEMS = {
+    'Plumbing & Mechanical': {icon:'sys-wrench', bg:'#FFF4C2', fg:'#8A6A00'},
+    'Electrical':            {icon:'sys-bolt', bg:'#D6F5EA', fg:'#16775A'},
+    'Appliances':            {icon:'sys-appliance', bg:'#FFE8D1', fg:'#A4561B'},
+    'Audio & Visual':        {icon:'sys-monitor', bg:'#ECE6FF', fg:'#5B45B0'},
+    'Exterior & Finishes':   {icon:'sys-house', bg:'#E1EAFF', fg:'#2F55B5'},
+    'Interior & Lighting':   {icon:'sys-bulb', bg:'#EEF7D2', fg:'#5A7713'},
+    'Vehicle & Recreation':  {icon:'sys-car', bg:'#D8F4FA', fg:'#1D6F86'},
+    'Troubleshoot':          {icon:'sys-siren', bg:'#FDE2E4', fg:'#B23A48'}
+  };
+  const CAT_SYSTEM = {appliance:'Appliances', fixture:'Interior & Lighting', system:'Plumbing & Mechanical', furniture:'Interior & Lighting', electronics:'Audio & Visual', outdoor:'Vehicle & Recreation'};
+  const systemOf = i => SYSTEMS[i.system] ? i.system : (guessSystem(i.name) || CAT_SYSTEM[i.cat] || '');
+  const sysChip = name => { const s = SYSTEMS[name]; return s ? `<span class="sys"><span class="sys-ic" style="background:${s.bg};color:${s.fg}">${ico(s.icon)}</span>${esc(name)}</span>` : '<span class="none">—</span>'; };
+  const SYS_HINTS = [[/water heater|furnace|boiler|(?<!patio )heater|hvac|air ?con|\bac\b|split|thermostat|humidif|vent|sink|faucet|toilet|shower|pump|softener|pipe|tap|filter|disposal|steam|vapor/i, 'Plumbing & Mechanical'],
+    [/panel|outlet|charger|switch|wiring|generator|breaker|opener/i, 'Electrical'], [/fridge|refrigerator|range|oven|washer|dryer|dishwasher|microwave|stove|hood/i, 'Appliances'],
+    [/\btv\b|router|speaker|sonos|soundbar|camera|printer|projector|wi-?fi/i, 'Audio & Visual'], [/light|lamp|fan|shade|chair|bed|desk|table|sofa|closet|shelf|shelving|vanity|floor|fireplace/i, 'Interior & Lighting'],
+    [/car|bike|ski|snow|tub|grill|boat|kayak|golf|heater/i, 'Vehicle & Recreation'], [/roof|gutter|shingle|deck|fence|siding|window|door|paint|driveway|boiler|liner/i, 'Exterior & Finishes'], [/alarm|smoke|detector|leak|extinguisher/i, 'Troubleshoot']];
+  const guessSystem = name => { const hit = SYS_HINTS.find(([re]) => re.test(name || '')); return hit ? hit[1] : ''; };
+  const systems = {SYSTEMS, systemOf, sysChip, guessSystem};
+
+  /* ---------- Add item modal (Items page and Space pages) ---------- */
+  document.head.insertAdjacentHTML('beforeend', `<style>
+/* One dropdown for space + sub-space: spaces as headings, sub-spaces indented below */
+.dd{position:relative;flex:none}
+.dd-btn{position:relative;display:flex;align-items:center;height:36px;min-width:190px;max-width:280px;padding:0 34px 0 12px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--ink);font-size:13.5px;font-weight:500;text-align:left}
+.dd-btn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dd-btn::after{content:"";position:absolute;right:10px;top:50%;width:16px;height:16px;margin-top:-8px;background:var(--ink-3);transition:transform .15s;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center/contain no-repeat}
+.dd-btn[aria-expanded="true"]::after{transform:rotate(180deg)}
+.dd-btn:hover{border-color:var(--ink-3)}
+.dd-btn:focus-visible{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint)}
+.dd.on .dd-btn{background:var(--brand-tint);border-color:transparent;color:var(--brand)}
+.dd.on .dd-btn::after{background:var(--brand)}
+.dd-pop{position:absolute;z-index:30;top:calc(100% + 6px);left:0;width:260px;max-height:400px;overflow:auto;margin:0;padding:6px 0;list-style:none;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(20,32,46,.14)}
+.dd-pop li{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:38px;padding:0 14px;font-size:14px;color:var(--ink);cursor:pointer}
+.dd-pop li.sp{font-weight:500}
+.dd-pop li.sp.has{border-bottom:1px solid var(--line)}
+.dd-pop li.sb{padding-left:32px;color:var(--ink-2)}
+.dd-pop li.sb + li.sp{margin-top:4px}
+.dd-pop li:hover,.dd-pop li.kb{background:var(--hover)}
+.dd-pop li[aria-selected="true"]{color:var(--brand);background:var(--brand-tint)}
+.dd-pop li svg.i{width:16px;height:16px;color:var(--brand);flex:none}
+.dd-pop li small{font-size:12px;color:var(--ink-3)}
+.dd-pop.fixed{position:fixed;z-index:60;top:auto;left:auto}
+.dd-pop.dd-panel{display:flex;flex-direction:column;padding:0;overflow:hidden}
+.dd-panel ul{list-style:none;margin:0;padding:4px 0 6px;overflow:auto;flex:1;min-height:0}
+.dd-search{position:relative;display:flex;align-items:center;flex:none;margin:8px;}
+.dd-search svg.i{position:absolute;left:11px;width:16px;height:16px;color:var(--ink-3);pointer-events:none}
+.dd-search input{width:100%;height:38px;padding:0 12px 0 34px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;-webkit-appearance:none;appearance:none}
+.dd-search input::placeholder{color:var(--ink-3)}
+.dd-search input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint)}
+.dd-search input::-webkit-search-cancel-button{cursor:pointer}
+.dd-panel mark{background:var(--amber-tint);color:inherit;border-radius:3px;padding:0 1px}
+.dd-none{padding:18px 14px;font-size:13.5px;color:var(--ink-3);text-align:center;cursor:default}
+.dd-none:hover{background:none}
+.sys-list li{min-height:46px}
+.sys-list .sys-ic{width:28px;height:28px;border-radius:8px}
+.dlg .dd-btn.has-chip{padding-left:6px}
+.dlg .dd-btn.has-chip .sys-ic{width:28px;height:28px;border-radius:7px}
+.dlg .dd-btn #aiSysLbl{display:flex;align-items:center;min-width:0}
+
+/* Add item modal */
+.dlg.wide{width:min(560px,100%)}
+.ai-photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px}
+.ai-ph{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--hover)}
+.ai-ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ai-ph .cover{position:absolute;left:6px;bottom:6px;padding:2px 7px;border-radius:999px;background:rgba(15,22,30,.7);color:#fff;font-size:11px;font-weight:600}
+.ai-ph .rm{position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:rgba(15,22,30,.65);color:#fff;opacity:0;transition:opacity .15s}
+.ai-ph:hover .rm,.ai-ph .rm:focus-visible{opacity:1}
+.ai-ph .rm svg.i{width:13px;height:13px;color:#fff}
+.ai-add{position:relative;aspect-ratio:1;border-radius:10px;border:1.5px dashed var(--line-2);display:grid;place-content:center;justify-items:center;gap:4px;color:var(--brand);font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);transition:border-color .15s,background .15s}
+.ai-add:hover,.ai-add.over{border-color:var(--brand);background:var(--brand-tint)}
+.ai-add input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.ai-add svg.i{width:20px;height:20px}
+.ai-photos.empty{grid-template-columns:1fr}
+.ai-photos.empty .ai-add{aspect-ratio:auto;padding:24px 16px;gap:6px;color:var(--ink-2);font-weight:400;font-size:13.5px}
+.ai-photos.empty .ai-add .ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);color:var(--icon)}
+.ai-photos.empty .ai-add b{color:var(--ink);font-weight:600}
+.ai-photos.empty .ai-add u{color:var(--brand);text-decoration:none;font-weight:600}
+.ai-photos.empty .ai-add small{color:var(--ink-3);font-size:12px}
+.ctl textarea{width:100%;min-height:84px;padding:10px 12px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;resize:vertical}
+.ctl textarea:hover{border-color:var(--ink-3)}
+.ctl textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint)}
+.lab-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lab-row label{font-size:13px;font-weight:600}
+.ai-write{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--brand);background:var(--brand-tint);transition:background .15s,transform .15s}
+.ai-write:hover{background:#d9e3f2}
+.ai-write:active{transform:scale(.97)}
+.ai-write:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.ai-write svg.i{width:14px;height:14px;color:var(--brand)}
+.ai-write[aria-busy="true"]{pointer-events:none;opacity:.85}
+.ai-write[aria-busy="true"] svg.i{animation:spark 1s ease-in-out infinite}
+@keyframes spark{50%{transform:scale(.7) rotate(20deg);opacity:.6}}
+.ai-ta{position:relative}
+.ai-ta.busy input,.ai-ta.busy textarea{border-color:var(--brand);background:linear-gradient(90deg,var(--surface) 0%,var(--brand-tint) 50%,var(--surface) 100%) 0 0/200% 100%;animation:shim 1.2s linear infinite}
+@keyframes shim{to{background-position:-200% 0}}
+.sys-pick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.sys-pick button{display:grid;justify-items:center;align-content:center;gap:7px;min-height:92px;padding:12px 6px;border-radius:14px;background:var(--bg);color:var(--ink);font-size:12.5px;font-weight:500;line-height:1.25;text-align:center;border:2px solid transparent;transition:transform .15s,border-color .15s,box-shadow .15s}
+.sys-pick button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(20,32,46,.08)}
+.sys-pick button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.sys-pick button[aria-checked="true"]{border-color:var(--fg);box-shadow:0 0 0 3px color-mix(in srgb,var(--fg) 18%,transparent)}
+.sys-pick .sp-ic svg.i{width:22px;height:22px;color:var(--fg)}
+@media (max-width:560px){.sys-pick{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ai-row{display:grid;grid-template-columns:1fr 1.4fr;gap:12px}
+.dd-pop li.fh{min-height:30px;padding:8px 14px 2px;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);cursor:default}
+.dd-pop li.fh:hover{background:none}
+.dd-pop li.fh:not(:first-child){margin-top:6px;border-top:1px solid var(--line);padding-top:12px}
+.dd-pop.fixed li.sp{padding-left:22px}
+.dd-pop.fixed li.sb{padding-left:40px}
+.dlg .dd-btn{width:100%;max-width:none;height:40px;font-size:14px;font-weight:400}
+.dlg .dd-btn.ph span{color:var(--ink-3)}
+.field.err .ctl input,.field.err .dd-btn{border-color:var(--red)}
+.pic .n{position:absolute;right:3px;bottom:3px;padding:0 5px;border-radius:999px;background:rgba(15,22,30,.7);color:#fff;font-size:10.5px;font-weight:600;line-height:16px}
+@media (max-width:560px){.ai-row{grid-template-columns:1fr}}
+</style>`);
+  const {SYSTEMS: SYSTEMS_, guessSystem: guessSystem_} = systems;
+  /* Prototype "recognition": reads the photo's file name (e.g. lennox-furnace.jpg → Lennox furnace) and guesses the system */
+  function guessFromPhoto(file = ''){
+    let base = file.replace(/\.[a-z0-9]+$/i, '').replace(/[_.\-]+/g, ' ').replace(/\b(img|dsc|pxl|photo|image|screenshot|whatsapp|copy)\b/gi, '').replace(/\d+/g, '').replace(/\s+/g, ' ').trim();
+    if (!/[a-z]{3}/i.test(base)) base = 'Household item';
+    const name = base.charAt(0).toUpperCase() + base.slice(1).toLowerCase();
+    return {name, system: guessSystem_(name)};
+  }
+
+  /* ---------- Add item: photos, name, description, floor, space / sub-space (one dropdown), system ---------- */
+  function addItemDialog({space = '', sub = '', onAdded, item = null, onSaved} = {}){
+    const photos0 = item ? (item.photos && item.photos.length ? [...item.photos] : item.photo ? [item.photo] : []) : [];
+    const st = {photos:photos0, names:photos0.map(() => ''), space, sub: item ? item.sub || '' : sub, open:false};
+    dialog({
+      title: item ? 'Edit item' : 'Add item', ok: item ? 'Save changes' : 'Add item', size: 'wide',
+      body: `
+        <div class="field"><span class="lab">Photos</span><div class="ai-photos" id="aiPhotos"></div></div>
+        <div class="field"><label for="aiName">Item name</label><div class="ctl"><input id="aiName" maxlength="60" placeholder="Leave empty and AI names it from the photo" autocomplete="off"></div></div>
+        <div class="field"><div class="lab-row"><label for="aiDesc">Description</label>
+            <button type="button" class="ai-write" id="aiWrite">${ico('sparkle')}<span>Write with AI</span></button></div>
+          <div class="ctl ai-ta"><textarea id="aiDesc" maxlength="400" placeholder="Brand, model, serial number, where it was bought…"></textarea></div>
+          <span class="msg" id="aiWriteMsg" hidden>Add a photo or an item name so AI knows what to write about.</span></div>
+        <div class="field"><span class="lab" id="aiSpaceL">Location</span>
+          <div class="dd" id="aiSpaceWrap"><button type="button" class="dd-btn" id="aiSpaceBtn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="aiSpaceL aiSpaceLbl"><span id="aiSpaceLbl"></span></button></div>
+          <span class="msg" hidden>Choose where the item is.</span></div>
+        <div class="field"><span class="lab" id="aiSysL">System</span><input type="hidden" id="aiSystem" value="">
+          <div class="dd"><button type="button" class="dd-btn" id="aiSysBtn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="aiSysL aiSysLbl"><span id="aiSysLbl"></span></button></div></div>`,
+      onOpen(bg){
+        const $ = s => bg.querySelector(s), btn = $('#aiSpaceBtn');
+        /* Location popover: search box + Floor › Space › Sub-space list */
+        const pop = document.createElement('div'); pop.className = 'dd-pop fixed dd-panel'; pop.hidden = true;
+        pop.innerHTML = `<label class="dd-search">${ico('search')}<input type="search" id="aiLocQ" placeholder="Search spaces and sub-spaces" autocomplete="off" aria-label="Search spaces and sub-spaces"></label><ul role="listbox" aria-label="Location" id="aiLocList"></ul>`;
+        bg.appendChild(pop);
+        const list = pop.querySelector('ul'), qIn = pop.querySelector('input');
+
+        /* System dropdown: the 8 systems with their icons */
+        const sBtn = $('#aiSysBtn'), sPop = document.createElement('ul');
+        sPop.className = 'dd-pop fixed sys-list'; sPop.setAttribute('role', 'listbox'); sPop.setAttribute('aria-label', 'System'); sPop.hidden = true;
+        bg.appendChild(sPop);
+        const chip = (n, s) => `<span class="sys"><span class="sys-ic" style="background:${s.bg};color:${s.fg}">${ico(s.icon)}</span>${esc(n)}</span>`;
+        const drawSys = () => {
+          const v = $('#aiSystem').value;
+          sPop.innerHTML = Object.entries(SYSTEMS_).map(([n, s]) => `<li role="option" data-sys="${esc(n)}" aria-selected="${n === v}">${chip(n, s)}${n === v ? ico('check') : ''}</li>`).join('');
+          $('#aiSysLbl').innerHTML = v ? chip(v, SYSTEMS_[v]) : 'Choose a system';
+          sBtn.classList.toggle('ph', !v); sBtn.classList.toggle('has-chip', !!v);
+        };
+        const setSys = v => { $('#aiSystem').value = v; drawSys(); };
+
+        const drawPhotos = () => {
+          const box = $('#aiPhotos'), add = (big) => `<label class="ai-add" id="aiDrop"><input type="file" accept="image/*" multiple aria-label="Add photos">
+            ${big ? `<span class="ic">${ico('upload')}</span><span><b>Drag photos here</b> or <u>browse</u></span><small>Add as many as you like · the first one is the cover</small>` : `${ico('plus')}<span>Add</span>`}</label>`;
+          box.classList.toggle('empty', !st.photos.length);
+          box.innerHTML = st.photos.map((src, n) => `<div class="ai-ph"><img src="${src}" alt="Photo ${n + 1}">${n === 0 ? '<span class="cover">Cover</span>' : ''}
+            <button type="button" class="rm" data-rmph="${n}" aria-label="Remove photo ${n + 1}">${ico('x')}</button></div>`).join('') + add(!st.photos.length);
+          const dz = $('#aiDrop');
+          ['dragenter', 'dragover'].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.add('over'); }));
+          ['dragleave', 'drop'].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.remove('over'); }));
+          dz.addEventListener('drop', e => addFiles(e.dataTransfer.files));
+          dz.querySelector('input').onchange = e => addFiles(e.target.files);
+        };
+        const addFiles = async files => {
+          const first = !st.photos.length;
+          for (const f of [...files].filter(f => f.type.startsWith('image/'))){ try { st.photos.push(await readPhoto(f, 600)); st.names.push(f.name); } catch(err){ toast(err.message); } }
+          drawPhotos();
+          /* First photo in and no name yet: AI names the item from the photo (and picks a system) */
+          const nm = $('#aiName');
+          if (first && st.photos.length && !nm.value.trim()){
+            const g = guessFromPhoto(st.names[0]);
+            nm.value = ''; nm.placeholder = 'Recognising item from photo…'; nm.closest('.ctl').classList.add('ai-ta', 'busy');
+            $('#aiWriteMsg').hidden = true;
+            setTimeout(() => {
+              nm.closest('.ctl').classList.remove('busy'); nm.placeholder = 'Leave empty and AI names it from the photo';
+              if (nm.value.trim()) return;
+              typeInto(nm, g.name);
+              if (g.system && !$('#aiSystem').value) setSys(g.system);
+            }, 900);
+          }
+        };
+        $('#aiPhotos').addEventListener('click', e => { const r = e.target.closest('[data-rmph]'); if (r){ e.preventDefault(); st.photos.splice(+r.dataset.rmph, 1); st.names.splice(+r.dataset.rmph, 1); drawPhotos(); } });
+
+        const drawSpace = () => {
+          const sp = store.get(st.space), cur = st.sub ? st.space + '--' + st.sub : st.space;
+          const q = qIn.value.trim().toLowerCase(), has = t => t.toLowerCase().includes(q);
+          const mark = t => { if (!q) return esc(t); const i = t.toLowerCase().indexOf(q); return i < 0 ? esc(t) : esc(t.slice(0, i)) + '<mark>' + esc(t.slice(i, i + q.length)) + '</mark>' + esc(t.slice(i + q.length)); };
+          const opt = (v, label, cls) => `<li role="option" class="${cls}" data-v="${v}" aria-selected="${v === cur}"><span>${mark(label)}</span>${v === cur ? ico('check') : ''}</li>`;
+          list.innerHTML = store.floors.map(f => {
+            /* a space shows when it (or its floor) matches — then with all its sub-spaces — or when one of its sub-spaces matches */
+            const rows = store.all().filter(s => s.floor === f.id).map(s => {
+              const all = !q || has(f.name) || has(s.name), subs = all ? s.subs : s.subs.filter(x => has(x.name));
+              return all || subs.length ? opt(s.id, s.name, 'sp') + subs.map(x => opt(s.id + '--' + x.id, x.name, 'sb')).join('') : '';
+            }).join('');
+            return rows ? `<li class="fh" role="presentation">${esc(f.name)}</li>` + rows : '';
+          }).join('') || `<li class="dd-none" role="presentation">No spaces match “${esc(qIn.value.trim())}”</li>`;
+          $('#aiSpaceLbl').textContent = !sp ? 'Choose floor, space and sub-space' : [store.floor(sp.floor).name, sp.name, st.sub ? sp.subs.find(x => x.id === st.sub).name : ''].filter(Boolean).join(' › ');
+          btn.classList.toggle('ph', !sp);
+        };
+        /* Shared popover behaviour: fixed position under (or above) its button, arrow keys, Enter, Escape */
+        const place = (b, p, maxH) => {
+          const r = b.getBoundingClientRect(), below = innerHeight - r.bottom - 12;
+          p.style.width = r.width + 'px'; p.style.left = r.left + 'px';
+          p.style.maxHeight = Math.max(200, Math.min(maxH, below > 240 ? below : r.top - 12)) + 'px';
+          if (below > 240){ p.style.top = (r.bottom + 6) + 'px'; p.style.bottom = 'auto'; } else { p.style.bottom = (innerHeight - r.top + 6) + 'px'; p.style.top = 'auto'; }
+        };
+        const keys = (e, p, onPick, close) => {
+          if (e.key === 'Escape'){ e.stopPropagation(); e.preventDefault(); return close(); }
+          if (!['ArrowDown', 'ArrowUp', 'Enter'].includes(e.key)) return;
+          e.preventDefault();
+          const li = [...p.querySelectorAll('[data-v],[data-sys]')], at = li.findIndex(x => x.classList.contains('kb'));
+          if (e.key === 'Enter'){ const t = at >= 0 ? li[at] : li.length === 1 ? li[0] : null; if (t) onPick(t); return; }
+          const next = Math.max(0, Math.min(li.length - 1, at + (e.key === 'ArrowDown' ? 1 : -1)));
+          li.forEach((x, i) => x.classList.toggle('kb', i === next)); if (li[next]) li[next].scrollIntoView({block:'nearest'});
+        };
+        const setOpen = open => {
+          if (open) setSysOpen(false);
+          st.open = open; pop.hidden = !open; btn.setAttribute('aria-expanded', open);
+          if (!open) return;
+          qIn.value = ''; drawSpace(); place(btn, pop, 380);
+          const s = list.querySelector('[aria-selected="true"]'); if (s) s.scrollIntoView({block:'nearest'});
+          qIn.focus();
+        };
+        const setSysOpen = open => {
+          if (open) setOpen(false);
+          sPop.hidden = !open; sBtn.setAttribute('aria-expanded', open);
+          if (open){ drawSys(); place(sBtn, sPop, 360); }
+        };
+        const pick = v => {
+          [st.space, st.sub = ''] = v.split('--');
+          const f = btn.closest('.field'); f.classList.remove('err'); f.querySelector('.msg').hidden = true;
+          drawSpace(); setOpen(false); btn.focus();
+        };
+        btn.onclick = () => setOpen(!st.open);
+        btn.onkeydown = e => { if (!st.open && (e.key === 'ArrowDown' || e.key === 'Enter')){ e.preventDefault(); setOpen(true); } };
+        list.onclick = e => { const li = e.target.closest('[data-v]'); if (li) pick(li.dataset.v); };
+        qIn.oninput = () => { drawSpace(); const first = list.querySelector('[data-v]'); if (first && qIn.value.trim()) first.classList.add('kb'); };
+        qIn.onkeydown = e => keys(e, list, li => pick(li.dataset.v), () => { setOpen(false); btn.focus(); });
+        sBtn.onclick = () => setSysOpen(sPop.hidden);
+        sBtn.onkeydown = e => {
+          if (sPop.hidden){ if (e.key === 'ArrowDown' || e.key === 'Enter'){ e.preventDefault(); setSysOpen(true); } return; }
+          keys(e, sPop, li => { setSys(li.dataset.sys); setSysOpen(false); }, () => setSysOpen(false));
+        };
+        sPop.onclick = e => { const li = e.target.closest('[data-sys]'); if (li){ setSys(li.dataset.sys); setSysOpen(false); sBtn.focus(); } };
+        bg.addEventListener('click', e => {
+          const path = e.composedPath();
+          if (st.open && !path.some(n => n === pop || n === btn)) setOpen(false);
+          if (!sPop.hidden && !path.some(n => n === sPop || n === sBtn)) setSysOpen(false);
+        });
+        $('.dlg').addEventListener('scroll', () => { if (st.open) setOpen(false); if (!sPop.hidden) setSysOpen(false); });
+        drawSys();
+        $('#aiName').oninput = e => { if (e.target.value.trim()) $('#aiWriteMsg').hidden = true; };
+        /* Write with AI (prototype): drafts a description from the name, system and location, typed in */
+        const aiBtn = $('#aiWrite'), ta = $('#aiDesc');
+        const typeInto = (el, text, done) => { let n = 0; el.value = ''; const t = setInterval(() => { n = Math.min(text.length, n + 4); el.value = text.slice(0, n); el.scrollTop = el.scrollHeight; if (n >= text.length){ clearInterval(t); done && done(); } }, 16); };
+        aiBtn.onclick = () => {
+          let name = $('#aiName').value.trim();
+          const fromPhoto = !name && st.photos.length;
+          $('#aiWriteMsg').hidden = !!(name || fromPhoto);
+          if (!name && !fromPhoto) return;
+          if (fromPhoto){
+            const g = guessFromPhoto(st.names[0]); name = g.name;
+            setTimeout(() => typeInto($('#aiName'), name), 900);
+            if (g.system && !$('#aiSystem').value) setSys(g.system);
+          }
+          const sys = $('#aiSystem').value, sp = store.get(st.space), x = sp && sp.subs.find(s => s.id === st.sub);
+          const where = sp ? (x ? `the ${x.name.toLowerCase()} of the ${sp.name.toLowerCase()}` : `the ${sp.name.toLowerCase()}`) : '';
+          const text = [
+            `${name}${sys ? ` (${sys})` : ''}${where ? ` located in ${where}` : ''} at Vail Residence.`,
+            `Keep the brand, model and serial number here, along with the purchase date and installer, so warranty claims and service visits are quick.`,
+            `Note any recurring maintenance, such as filter changes or annual servicing, and attach the manual and receipts under Documents.`
+          ].join(' ');
+          aiBtn.setAttribute('aria-busy', 'true'); aiBtn.querySelector('span').textContent = 'Writing…';
+          ta.closest('.ctl').classList.add('busy'); ta.readOnly = true;
+          setTimeout(() => {
+            ta.closest('.ctl').classList.remove('busy');
+            typeInto(ta, text, () => { ta.readOnly = false; aiBtn.removeAttribute('aria-busy'); aiBtn.querySelector('span').textContent = 'Rewrite with AI'; });
+          }, 900);
+        };
+
+        /* Edit mode: start from the item's saved details */
+        if (item){
+          $('#aiName').value = item.name || '';
+          $('#aiDesc').value = item.desc || '';
+          setSys(systems.systemOf(item));
+        }
+        drawPhotos(); drawSpace();
+        bg._st = st;
+      },
+      onOk(bg){
+        const st = bg._st, $ = s => bg.querySelector(s);
+        const name = $('#aiName').value.trim() || (item ? item.name : st.photos.length ? guessFromPhoto(st.names[0]).name : 'Untitled item');
+        const flag = (el, bad) => { const f = el.closest('.field'); f.classList.toggle('err', bad); f.querySelector('.msg').hidden = !bad; return bad; };
+        if (flag($('#aiSpaceBtn'), !st.space)){ $('#aiSpaceBtn').focus(); return false; }
+        const data = {name, desc: $('#aiDesc').value.trim(), sub: st.sub, system: $('#aiSystem').value, photo: st.photos[0] || null, photos: st.photos};
+        const sp = store.get(st.space), x = sp.subs.find(s => s.id === st.sub), where = x ? sp.name + ' › ' + x.name : sp.name;
+        if (item){
+          store.moveItem(space, item.id, st.space, data);
+          onSaved && onSaved(st.space, st.sub);
+          toast(`${name} saved`);
+          return;
+        }
+        store.addItem(st.space, {...data, cat: ''});
+        onAdded && onAdded(st.space, st.sub);
+        toast(`${name} added to ${where}`);
+      }
+    });
+  }
+
+  window.HRK = {addItemDialog, systems, store, docs, checklists, activity, access, notes, fileIcon, ext, ico, esc, plural, toast, flashNext, dialog, menu, closePop, readPhoto, pickPhoto, thumb, spaceDialog, deleteSpaceDialog, CATS};
 })();

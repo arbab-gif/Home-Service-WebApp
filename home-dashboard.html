@@ -48,7 +48,10 @@ svg.i.accent,.drop svg.i{color:var(--icon)}
 
 /* Top bar */
 .top{background:var(--surface);border-bottom:1px solid var(--line)}
-.top-in{max-width:1240px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;gap:24px}
+/* Side space: 100px on desktop, 40px on smaller laptops and tablets, 16px on phones */
+:root{--side:100px}
+@media (max-width:1280px){:root{--side:40px}}
+.top-in{max-width:none;margin:0;padding:0 var(--side);height:60px;display:flex;align-items:center;gap:24px}
 .logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px;letter-spacing:-.015em;white-space:nowrap}
 .logo img{height:36px;width:auto}
 .switch{position:relative;min-width:0}
@@ -155,7 +158,7 @@ svg.i.accent,.drop svg.i{color:var(--icon)}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:8px;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.2);max-width:calc(100vw - 32px)}
 @media (max-width:560px){.opts{grid-template-columns:1fr}}
 
-/* Page */.page{max-width:1240px;margin:0 auto;padding-inline:24px;padding-block:28px 64px}
+/* Page */.page{max-width:none;margin:0;padding-inline:var(--side);padding-block:28px 64px}
 .greet{margin-bottom:22px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 32px}
 .greet-txt{min-width:0}
 .greet h1{font-size:28px;line-height:1.15;font-weight:600;letter-spacing:-.02em;margin:0}
@@ -424,6 +427,7 @@ span.role{background:var(--brand-tint)!important;border-color:transparent!import
     <nav class="nav" aria-label="Main">
       <a href="home-dashboard.html" data-sec="" aria-current="page">Overview</a>
       <a href="spaces.html">Spaces</a>
+      <a href="items.html">Items</a>
       <a href="documents.html">Documents</a>
       <a href="checklists.html">Checklists<span class="nav-n">4</span></a>
       <a href="activity.html">Activity</a>
@@ -559,8 +563,8 @@ span.role{background:var(--brand-tint)!important;border-color:transparent!import
       <div class="row">
         <span class="lbl">What is this document for?</span>
         <div class="seg-choice" id="upType" role="radiogroup" aria-label="Document type">
-          <button type="button" class="opt" data-t="item" role="radio" aria-pressed="false"><span class="oi"><svg class="i"><use href="#i-box"/></svg></span><span><b>An item</b><small>Warranty, invoice or manual</small></span></button>
-          <button type="button" class="opt" data-t="property" role="radio" aria-pressed="false"><span class="oi"><svg class="i"><use href="#i-house"/></svg></span><span><b>The property</b><small>Legal, insurance, tax or permit</small></span></button>
+          <button type="button" class="opt" data-t="item" role="radio" aria-pressed="false"><span class="oi"><svg class="i"><use href="#i-box"/></svg></span><span><b>An item</b></span></button>
+          <button type="button" class="opt" data-t="property" role="radio" aria-pressed="false"><span class="oi"><svg class="i"><use href="#i-house"/></svg></span><span><b>The property</b></span></button>
         </div>
       </div>
       <div class="row step" id="upCatRow" hidden>
@@ -765,7 +769,7 @@ span.role{background:var(--brand-tint)!important;border-color:transparent!import
       (up.type === 'item' && !up.item) ? 'Choose the item' : !up.files.length ? 'Add at least one file' : 'Ready to upload';
   }
   function openUpload(){
-    Object.assign(up, {type:null, cat:null, item:'', files:[]});
+    Object.assign(up, {type:'item', cat:null, item:'', files:[]});
     $('#upItem').innerHTML = `<option value="">Select an item</option>` +
       Object.entries(D.itemGroups()).map(([g, items]) => `<optgroup label="${esc(g)}">${items.map(i => `<option value="${esc(i.space + '|' + i.name)}">${esc(i.name)}</option>`).join('')}</optgroup>`).join('');
     $('#upInput').value = '';

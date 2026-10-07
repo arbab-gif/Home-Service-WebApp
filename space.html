@@ -66,6 +66,8 @@
 .pic.add svg.i{position:relative;width:18px;height:18px;color:var(--brand)}
 .pic.add:hover{border-color:var(--brand);background:var(--brand-tint)}
 .photo-pick .pv.sq{width:72px;aspect-ratio:1}
+.it-link{color:inherit;display:block;min-width:0}
+.it-link:hover b{color:var(--brand);text-decoration:underline}
 .it b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .it span{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden}
 .items-foot{padding:10px 20px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
@@ -90,6 +92,7 @@
     <nav class="nav" aria-label="Main">
       <a href="home-dashboard.html">Overview</a>
       <a href="spaces.html" aria-current="page">Spaces</a>
+      <a href="items.html">Items</a>
       <a href="documents.html">Documents</a>
       <a href="checklists.html">Checklists<span class="nav-n">4</span></a>
       <a href="activity.html">Activity</a>
@@ -119,7 +122,7 @@
     return list.map(i => `
       <li class="item">
         ${i.photo ? `<span class="pic"><img src="${esc(i.photo)}" alt="" loading="lazy"></span>` : `<button type="button" class="pic add" data-itemphoto="${i.id}" aria-label="Add a photo of ${esc(i.name)}">${ico('plus')}</button>`}
-        <span class="it"><b>${esc(i.name)}</b><span>${esc(i.model || CATS[i.cat] || '')}</span></span>
+        <span class="it"><a class="it-link" href="item.html#${i.id}"><b>${esc(i.name)}</b></a><span>${esc(i.model || CATS[i.cat] || '')}</span></span>
         ${kebabBtn(`data-itemmenu="${i.id}"`, i.name)}
       </li>`).join('');
   }
@@ -232,45 +235,6 @@
     });
   }
 
-  function itemDialog(s, preset, item){
-    const cur = item ? item.sub : preset;
-    let photo = item ? item.photo || null : null;
-    const subOpts = `<option value="">${esc(s.name)} (not in a sub-space)</option>` + s.subs.map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
-    const catOpts = Object.entries(CATS).map(([k, v]) => `<option value="${k}" ${item && item.cat === k ? 'selected' : ''}>${v}</option>`).join('');
-    const where = cur ? (s.subs.find(x => x.id === cur) || {}).name : s.name;
-    dialog({
-      title: item ? `Edit ${esc(item.name)}` : `Add item to ${esc(where)}`, ok: item ? 'Save changes' : 'Add item',
-      body: `<div class="field"><label for="itName">Item name<span class="req">*</span></label>
-          <div class="ctl"><input id="itName" maxlength="60" placeholder="e.g. Dishwasher" value="${item ? esc(item.name) : ''}"></div><span class="msg" hidden>Enter a name.</span></div>
-        <div class="field"><label for="itModel">Brand or model</label><div class="ctl"><input id="itModel" maxlength="60" placeholder="Optional" value="${item ? esc(item.model || '') : ''}"></div></div>
-        <div class="field"><label for="itSub">Linked to</label><div class="ctl sel"><select id="itSub">${subOpts}</select></div></div>
-        <div class="field"><label for="itCat">Type</label><div class="ctl sel"><select id="itCat">${catOpts}</select></div></div>
-        <div class="field"><span class="lab">Photo</span>
-          <div class="photo-pick"><span class="pv sq" id="itPv"></span>
-            <span class="acts"><button type="button" class="btn" id="itPick">${ico('upload')}<span>Upload</span></button><button type="button" class="btn" id="itDrop">${ico('trash')}Remove</button></span></div></div>`,
-      onOpen(bg){
-        const draw = () => {
-          bg.querySelector('#itPv').innerHTML = photo ? `<img src="${esc(photo)}" alt="">` : ico('image');
-          bg.querySelector('#itPick span').textContent = photo ? 'Replace' : 'Upload';
-          bg.querySelector('#itDrop').hidden = !photo;
-        };
-        draw();
-        bg.querySelector('#itPick').onclick = async () => { const f = await pickPhoto(); if (!f) return; try { photo = await readPhoto(f, 600); draw(); } catch(err){ toast(err.message); } };
-        bg.querySelector('#itDrop').onclick = () => { photo = null; draw(); };
-      },
-      onOk(bg){
-        const v = bg.querySelector('#itName').value.trim(), f = bg.querySelector('.field');
-        f.classList.toggle('err', !v); f.querySelector('.msg').hidden = !!v;
-        if (!v) return false;
-        const sub = bg.querySelector('#itSub').value;
-        const data = {name:v, model:bg.querySelector('#itModel').value.trim(), sub, cat:bg.querySelector('#itCat').value, photo};
-        if (item) store.updateItem(s.id, item.id, data); else store.addItem(s.id, data);
-        if (sub){ tab = 'subs'; activeSub = sub; } else { tab = 'items'; }
-        toast(item ? `${v} updated` : `${v} added to ${sub ? s.subs.find(x => x.id === sub).name : s.name}`); render();
-      }
-    });
-  }
-
   /* Item menu: options are shown for the design; actions are not wired up */
   function itemMenu(s, k){
     menu(k, [
@@ -286,7 +250,11 @@
     if (hp) hp.onclick = async () => { const f = await pickPhoto(); if (!f) return; try { store.updateSpace(s.id, {photo: await readPhoto(f)}); render(); toast('Cover photo added'); } catch(err){ toast(err.message); } };
     $('#tabs').onclick = e => { const b = e.target.closest('[data-tab]'); if (!b || b.dataset.tab === tab) return; tab = b.dataset.tab; render(); $('#tab-' + tab).focus(); };
     $('#tabs').onkeydown = e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft'){ e.preventDefault(); tab = tab === 'items' ? 'subs' : 'items'; render(); $('#tab-' + tab).focus(); } };
-    const ai = $('#addItem'); if (ai) ai.onclick = () => itemDialog(s, '');
+    const ai = $('#addItem'); if (ai) ai.onclick = () => HRK.addItemDialog({space:s.id, onAdded(sp, sub){
+      if (sp !== s.id){ location.href = 'space.html#' + sp + (sub ? '--' + sub : ''); return; }
+      if (sub){ tab = 'subs'; activeSub = sub; } else tab = 'items';
+      render();
+    }});
     const as = $('#addSub'); if (as) as.onclick = () => subDialog(s);
     const iq = $('#iq'); if (iq) iq.addEventListener('input', e => {
       q = e.target.value; const pos = e.target.selectionStart; render();
